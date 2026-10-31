@@ -761,16 +761,13 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; }
 /* ---------- Page navigation tabs ---------- */
 .page-tabs {
   display: flex;
-  gap: 7px;
+  flex-wrap: wrap;
+  gap: 6px;
   flex: 0 0 auto;
-  padding: 12px 22px;
-  overflow-x: auto;
-  overflow-y: hidden;
+  padding: 10px 22px;
   background-color: var(--surface-alt);
   border-bottom: 1px solid var(--line);
-  scrollbar-width: none;
 }
-.page-tabs::-webkit-scrollbar { height: 0; }
 
 .page-tab {
   position: relative;
@@ -903,45 +900,64 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; }
   border-radius: var(--radius);
 }
 
-/* ---------- Action bar ---------- */
+/* ---------- Action bar (top, below customer name, 2 neat rows) ---------- */
 .action-bar {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 14px;
   flex: 0 0 auto;
-  padding: 12px 22px;
+  padding: 11px 22px;
   background-color: var(--surface);
-  border-top: 1px solid var(--line);
-  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
 }
 
-.action-status { display: flex; align-items: center; gap: 9px; flex: 0 0 auto; }
-.action-status label { font-size: 12.5px; font-weight: 700; color: var(--ink-muted); white-space: nowrap; }
+.action-status {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  flex: 0 0 140px;
+}
+.action-status label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
 .action-status select {
-  padding: 8px 12px;
+  padding: 7px 10px;
   border: 1.5px solid var(--line-strong);
   border-radius: var(--radius-sm);
   background-color: var(--surface);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   cursor: pointer;
 }
 .action-status select:focus { outline: none; border-color: var(--brand); }
 
-.action-commands { display: flex; align-items: center; gap: 7px; flex-wrap: nowrap; }
+.action-commands {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
 
 .cmd-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 8px 14px;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 10px;
   border-radius: var(--radius-pill);
   border: 1px solid var(--line-strong);
   background-color: var(--surface);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--ink-soft);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: all .16s var(--ease);
 }
 .cmd-btn:hover { border-color: var(--brand); color: var(--brand); background-color: var(--brand-tint); }
