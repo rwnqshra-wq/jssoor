@@ -374,6 +374,7 @@ function userPublicRow(user, extra = {}) {
       status,
       status_label: def ? def.label_ar : status,
       is_read: Boolean(user.is_read),
+      is_pinned: Boolean(user.is_pinned),
       waiting_for_decision: Boolean(user.waiting_for_decision),
       current_page: String(user.current_page || ''),
       created_at: String(user.created_at || ''),
@@ -415,6 +416,7 @@ async function ensureUser(ref) {
     total_price: '',
     status: 'new',
     is_read: false,
+    is_pinned: false,
     waiting_for_decision: false,
     current_page: '',
     created_at: now,
@@ -580,6 +582,9 @@ async function listConversations(limit = 300) {
   if (useLocalFallback) {
     users = [...localData.users]
       .sort((a, b) => {
+        if (Boolean(b.is_pinned) !== Boolean(a.is_pinned)) {
+          return b.is_pinned ? 1 : -1;
+        }
         if (b.last_activity !== a.last_activity) {
           return b.last_activity > a.last_activity ? 1 : -1;
         }
@@ -599,7 +604,7 @@ async function listConversations(limit = 300) {
 
   users = await col('users')
     .find({})
-    .sort({ last_activity: -1, id: -1 })
+    .sort({ is_pinned: -1, last_activity: -1, id: -1 })
     .limit(limit)
     .toArray();
 
@@ -1391,6 +1396,97 @@ app.post(['/api/clear_all.php', '/api/clear_all'], async (req, res) => {
     });
   } catch (err) {
     console.error('[clear_all]', err);
+    res.status(500).json({ ok: false, error: 'Server error.' });
+  }
+});
+
+// 9c. Pin / Unpin a Conversation: POST /api/pin_user.php
+app.post(['/api/pin_user.php', '/api/pin_user'], async (req, res) => {
+  try {
+    const ctx = await requireAdminWrite(req, res);
+    if (!ctx) return;
+
+    const userId = Number(inputVal(req, 'id', 0));
+    if (!userId || userId <= 0) {
+      return res.status(422).json({ ok: false, error: 'A valid conversation id is required.' });
+    }
+
+    const user = await findUserById(userId);
+    if (!user) {
+      return res.status(404).json({ ok: false, error: 'Conversation not found.' });
+    }
+
+    const rawPinned = inputVal(req, 'pinned', null);
+    const isPinned = rawPinned === null || rawPinned === ''
+      ? !Boolean(user.is_pinned)
+      : Number(rawPinned) === 1 || rawPinned === true;
+
+    if (useLocalFallback) {
+      user.is_pinned = isPinned;
+      saveLocalStore();
+    } else {
+      await col('users').updateOne({ id: userId }, { $set: { is_pinned: isPinned } });
+    }
+
+    const updated = (await findUserById(userId)) || user;
+    const pub = userPublicRow(updated);
+
+    await recordEvent('user.pinned', userId, {
+      user: pub,
+      is_pinned: isPinned
+    });
+
+    res.json({
+      ok: true,
+      user: pub,
+      is_pinned: isPinned
+    });
+  } catch (err) {
+    console.error('[pin_user]', err);
+    res.status(500).json({ ok: false, error: 'Server error.' });
+  }
+});
+
+// 9d. Delete Single Conversation: POST /api/delete_user.php
+app.post(['/api/delete_user.php', '/api/delete_user'], async (req, res) => {
+  try {
+    const ctx = await requireAdminWrite(req, res);
+    if (!ctx) return;
+
+    const userId = Number(inputVal(req, 'id', 0));
+    if (!userId || userId <= 0) {
+      return res.status(422).json({ ok: false, error: 'A valid conversation id is required.' });
+    }
+
+    const user = await findUserById(userId);
+    if (!user) {
+      return res.status(404).json({ ok: false, error: 'Conversation not found.' });
+    }
+
+    if (useLocalFallback) {
+      localData.users = localData.users.filter((u) => u.id !== userId);
+      localData.submissions = localData.submissions.filter((s) => s.user_id !== userId);
+      localData.messages = localData.messages.filter((m) => m.user_id !== userId);
+      localData.commands = localData.commands.filter((c) => c.user_id !== userId);
+      saveLocalStore();
+    } else {
+      await Promise.all([
+        col('users').deleteOne({ id: userId }),
+        col('submissions').deleteMany({ user_id: userId }),
+        col('messages').deleteMany({ user_id: userId }),
+        col('commands').deleteMany({ user_id: userId })
+      ]);
+    }
+
+    await recordEvent('user.deleted', userId, { id: userId });
+
+    res.json({
+      ok: true,
+      id: userId,
+      deleted: true
+    });
+  } catch (err) {
+    console.error('[delete_user]', err);
     res.status(500).json({ ok: false, error: 'Server error.' });
   }
 });

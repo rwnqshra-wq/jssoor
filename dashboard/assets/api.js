@@ -228,6 +228,20 @@ const api = {
     return apiRequest('clear_all.php', { method: 'POST', body: { confirm: true } });
   },
 
+  /** Pin or unpin a single conversation. */
+  pinUser: function (id, isPinned) {
+    const body = { id: id };
+    if (isPinned !== undefined && isPinned !== null) {
+      body.pinned = isPinned ? 1 : 0;
+    }
+    return apiRequest('pin_user.php', { method: 'POST', body: body });
+  },
+
+  /** Delete a single conversation and all its submissions. */
+  deleteUser: function (id) {
+    return apiRequest('delete_user.php', { method: 'POST', body: { id: id } });
+  },
+
   /** Move a conversation into a different status. */
   setStatus: function (id, status) {
     return apiRequest('set_status.php', {

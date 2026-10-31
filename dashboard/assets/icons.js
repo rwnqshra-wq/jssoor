@@ -43,6 +43,11 @@ const ICON_PATHS = {
   send:       '<path d="M21 4 3 11l7 2.5L12.5 21 21 4Z" stroke-linejoin="round"/><path d="M10 13.5 21 4" stroke-linecap="round"/>',
   chevronDown:'<path d="m6 9.5 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>',
   chevronLeft:'<path d="M15 6.5l-6 5.5 6 5.5" stroke-linecap="round" stroke-linejoin="round"/>',
+  copy:       '<rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M5.5 15.5h-1a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke-linecap="round"/>',
+  pin:        '<path d="M15 4.5l4.5 4.5-2 2-3-1-4 4 1 3-1.5 1.5-4.5-4.5-3.5 3.5M12.5 7l-4 4-3-1L4 11.5l4.5 4.5" stroke-linecap="round" stroke-linejoin="round"/>',
+  trash:      '<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14ZM10 11v6M14 11v6" stroke-linecap="round" stroke-linejoin="round"/>',
+  volume:     '<path d="M11 5 6 9H3v6h3l5 4V5ZM15.5 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke-linecap="round" stroke-linejoin="round"/>',
+  mute:       '<path d="M11 5 6 9H3v6h3l5 4V5ZM21 9l-6 6M15 9l6 6" stroke-linecap="round" stroke-linejoin="round"/>',
   dot:        '<circle cx="12" cy="12" r="4"/>',
   empty:      '<path d="M4 6h16v11H9l-5 4V6Z" stroke-linejoin="round"/>'
 };

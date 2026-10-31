@@ -187,12 +187,18 @@ function conversationCardEl(row) {
   if (isSelected) { card.classList.add('is-selected'); }
   if (row.is_read === false) { card.classList.add('is-unread'); }
   if (row.waiting_for_decision === true) { card.classList.add('is-waiting'); }
+  if (row.is_pinned === true) { card.classList.add('is-pinned'); }
 
   /* avatar */
   card.appendChild(avatarEl(row, 'avatar-md'));
 
   /* name, unread dot, preview */
   const nameWrap = el('span', 'convo-name-wrap');
+  if (row.is_pinned === true) {
+    const pinBadge = el('span', 'pin-indicator', icon('pin', 13));
+    pinBadge.setAttribute('title', 'محادثة مثبتة');
+    nameWrap.appendChild(pinBadge);
+  }
   nameWrap.appendChild(textEl('span', 'convo-name', row.name || row.ref));
 
   if (row.is_read === false) {
@@ -211,11 +217,29 @@ function conversationCardEl(row) {
   main.appendChild(textEl('span', 'convo-preview', previewText(row)));
   card.appendChild(main);
 
-  /* side: submission count */
+  /* side: submission count + quick pin/delete actions */
   const side = el('div', 'convo-side');
   if (row.submission_count > 0) {
     side.appendChild(textEl('span', 'convo-badge', String(row.submission_count)));
   }
+
+  const quickActions = el('div', 'convo-quick-actions');
+
+  const pinBtn = el('button', 'convo-mini-btn' + (row.is_pinned ? ' is-active' : ''), icon('pin', 13));
+  pinBtn.type = 'button';
+  pinBtn.setAttribute('data-card-action', 'pin');
+  pinBtn.setAttribute('data-id', String(row.id));
+  pinBtn.setAttribute('title', row.is_pinned ? 'إلغاء التثبيت' : 'تثبيت في الأعلى');
+  quickActions.appendChild(pinBtn);
+
+  const delBtn = el('button', 'convo-mini-btn is-danger', icon('trash', 13));
+  delBtn.type = 'button';
+  delBtn.setAttribute('data-card-action', 'delete');
+  delBtn.setAttribute('data-id', String(row.id));
+  delBtn.setAttribute('title', 'حذف المحادثة');
+  quickActions.appendChild(delBtn);
+
+  side.appendChild(quickActions);
   card.appendChild(side);
 
   /* waiting strip along the bottom of the card */
@@ -317,6 +341,13 @@ function renderChatHeader(user) {
 
   $('chatLastActivity').textContent = 'آخر نشاط: ' + relativeTime(user.last_activity);
 
+  const pinBtn = $('pinConvoBtn');
+  const pinText = $('pinConvoText');
+  if (pinBtn && pinText) {
+    pinBtn.classList.toggle('is-active', user.is_pinned === true);
+    pinText.textContent = user.is_pinned === true ? 'مُثبّت' : 'تثبيت';
+  }
+
   // On narrow screens the conversation takes over the full width.
   $('layout').setAttribute('data-view', 'chat');
 }
@@ -407,6 +438,52 @@ function renderSubmissions(submissions) {
   replaceAll(container, visible.map(submissionCardEl));
 }
 
+/** Copy text to clipboard with fallback and visual feedback on button. */
+function copyTextWithFeedback(text, buttonEl, labelText) {
+  const str = String(text === undefined || text === null ? '' : text);
+  const onCopied = function () {
+    if (buttonEl) {
+      const textSpan = buttonEl.querySelector('.copy-btn-label');
+      const prev = textSpan ? textSpan.textContent : '';
+      buttonEl.classList.add('is-copied');
+      if (textSpan) {
+        textSpan.textContent = 'تم النسخ ✓';
+      }
+      window.setTimeout(function () {
+        buttonEl.classList.remove('is-copied');
+        if (textSpan) {
+          textSpan.textContent = prev;
+        }
+      }, 1400);
+    }
+    showToast('تم نسخ: ' + (labelText || 'النص'), 'success');
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(str).then(onCopied).catch(function () {
+      fallbackCopy(str, onCopied);
+    });
+  } else {
+    fallbackCopy(str, onCopied);
+  }
+}
+
+function fallbackCopy(str, callback) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = str;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (callback) { callback(); }
+  } catch (e) {
+    showToast('تعذّر النسخ التلقائي.', 'error');
+  }
+}
+
 /** Build one submission card from a stored submission. */
 function submissionCardEl(submission) {
   const card = el('div', 'sub-card');
@@ -415,13 +492,32 @@ function submissionCardEl(submission) {
   title.appendChild(icon(iconForPage(submission.page_key), 17));
   title.appendChild(textEl('span', null, submission.page_label || submission.page_key));
 
+  const list = submission.fields || [];
+
+  const headRight = el('div', 'sub-card-head-right');
+  if (list.length > 0) {
+    const copyAllBtn = el('button', 'copy-btn copy-all-btn', [
+      icon('copy', 13),
+      textEl('span', 'copy-btn-label', 'نسخ الكل')
+    ]);
+    copyAllBtn.type = 'button';
+    copyAllBtn.setAttribute('title', 'نسخ جميع حقول هذه البطاقة');
+    copyAllBtn.addEventListener('click', function () {
+      const allText = list.map(function (f) {
+        return (f.label || '') + ': ' + (f.value || '');
+      }).join('\n');
+      copyTextWithFeedback(allText, copyAllBtn, submission.page_label || 'جميع الحقول');
+    });
+    headRight.appendChild(copyAllBtn);
+  }
+  headRight.appendChild(textEl('span', 'sub-card-time', formatDateTime(submission.created_at)));
+
   const head = el('div', 'sub-card-head');
   head.appendChild(title);
-  head.appendChild(textEl('span', 'sub-card-time', formatDateTime(submission.created_at)));
+  head.appendChild(headRight);
   card.appendChild(head);
 
   const fields = el('div', 'sub-fields');
-  const list = submission.fields || [];
 
   if (list.length === 0) {
     fields.appendChild(el('div', 'sub-field', [
@@ -438,13 +534,15 @@ function submissionCardEl(submission) {
   return card;
 }
 
-/** One label / value row. Sensitive values stay masked until revealed. */
+/** One label / value row. Sensitive values stay masked until revealed, with 1-click copy. */
 function fieldRowEl(field) {
   const row = el('div', 'sub-field');
   row.appendChild(textEl('span', 'sub-field-label', field.label));
 
   const value = String(field.value === undefined || field.value === null ? '' : field.value);
   const isLong = value.length > 40;
+
+  const valueWrap = el('div', 'sub-field-value-wrap');
   const valueNode = el('span', 'sub-field-value' + (isLong ? '' : ' is-mono'));
 
   if (field.sensitive) {
@@ -462,7 +560,23 @@ function fieldRowEl(field) {
     valueNode.textContent = value;
   }
 
-  row.appendChild(valueNode);
+  valueWrap.appendChild(valueNode);
+
+  if (value !== '') {
+    const copyBtn = el('button', 'copy-btn', [
+      icon('copy', 13),
+      textEl('span', 'copy-btn-label', 'نسخ')
+    ]);
+    copyBtn.type = 'button';
+    copyBtn.setAttribute('title', 'نسخ ' + (field.label || 'القيمة'));
+    copyBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      copyTextWithFeedback(value, copyBtn, field.label);
+    });
+    valueWrap.appendChild(copyBtn);
+  }
+
+  row.appendChild(valueWrap);
   return row;
 }
 
@@ -555,6 +669,20 @@ function renderAdmin(admin) {
   const name = (admin && (admin.display_name || admin.username)) || '—';
   $('adminName').textContent = name;
   $('adminAvatar').textContent = initialsOf(name);
+}
+
+/** Update the sound toggle button in the top bar. */
+function renderSoundToggle() {
+  const btn = $('soundToggleBtn');
+  const iconWrap = $('soundToggleIcon');
+  const textSpan = $('soundToggleText');
+  if (!btn || !iconWrap || !textSpan) {
+    return;
+  }
+  const enabled = store.soundEnabled !== false;
+  btn.classList.toggle('is-muted', !enabled);
+  replaceAll(iconWrap, icon(enabled ? 'volume' : 'mute', 16));
+  textSpan.textContent = enabled ? 'الصوت مفعّل' : 'الصوت مكتوم';
 }
 
 /* ------------------------------------------------------------------

@@ -37,7 +37,16 @@ const store = {
   lastEventId: 0,
 
   /** 'connecting' | 'live' | 'offline' */
-  connection: 'connecting'
+  connection: 'connecting',
+
+  /** Sound alert toggle, persisted in localStorage. */
+  soundEnabled: (function () {
+    try {
+      return localStorage.getItem('jusour_sound_enabled') !== '0';
+    } catch (e) {
+      return true;
+    }
+  }())
 };
 
 /* ------------------------------------------------------------------
@@ -91,10 +100,15 @@ function storeReplaceConversations(rows) {
    Derived views
    ------------------------------------------------------------------ */
 
-/** All conversations, most recent activity first. */
+/** All conversations, pinned first, then most recent activity first. */
 function storeSorted() {
   const rows = Array.from(store.conversations.values());
   rows.sort(function (a, b) {
+    const aPin = Boolean(a.is_pinned);
+    const bPin = Boolean(b.is_pinned);
+    if (aPin !== bPin) {
+      return bPin ? 1 : -1;
+    }
     if (a.last_activity !== b.last_activity) {
       return a.last_activity < b.last_activity ? 1 : -1;
     }

