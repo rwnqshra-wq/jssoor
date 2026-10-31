@@ -1,7 +1,8 @@
 node_modules/
 server/node_modules/
+frontend/public/
+dashboard/public/
 .env
 server/.env
 server/.local_store_*.json
 .DS_Store
-
