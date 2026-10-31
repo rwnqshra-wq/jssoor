@@ -423,7 +423,33 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; }
   padding: 16px 18px 12px;
 }
 .pane-head h2 { font-size: 17px; }
-.pane-head-tools { display: flex; align-items: center; gap: 4px; }
+.pane-head-tools { display: flex; align-items: center; gap: 6px; }
+
+.clear-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid #f0cfcf;
+  background-color: var(--rose-tint);
+  color: #a82525;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color .16s var(--ease), border-color .16s var(--ease);
+}
+.clear-all-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+.clear-all-btn:hover {
+  background-color: #f8d8d8;
+  border-color: #e2a8a8;
+}
 
 .pane-search { position: relative; padding: 0 14px 10px; }
 .pane-search .search-icon {

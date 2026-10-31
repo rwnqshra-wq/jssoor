@@ -1362,6 +1362,39 @@ app.post(['/api/mark_read.php', '/api/mark_read'], async (req, res) => {
   }
 });
 
+// 9b. Clear All Users & Submissions: POST /api/clear_all.php
+app.post(['/api/clear_all.php', '/api/clear_all'], async (req, res) => {
+  try {
+    const ctx = await requireAdminWrite(req, res);
+    if (!ctx) return;
+
+    if (useLocalFallback) {
+      localData.users = [];
+      localData.submissions = [];
+      localData.messages = [];
+      localData.commands = [];
+      saveLocalStore();
+    } else {
+      await Promise.all([
+        col('users').deleteMany({}),
+        col('submissions').deleteMany({}),
+        col('messages').deleteMany({}),
+        col('commands').deleteMany({})
+      ]);
+    }
+
+    await recordEvent('conversations.cleared', null, { cleared: true });
+
+    res.json({
+      ok: true,
+      cleared: true
+    });
+  } catch (err) {
+    console.error('[clear_all]', err);
+    res.status(500).json({ ok: false, error: 'Server error.' });
+  }
+});
+
 // 10. Set Status: POST /api/set_status.php
 app.post(['/api/set_status.php', '/api/set_status'], async (req, res) => {
   try {

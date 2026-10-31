@@ -125,7 +125,8 @@ const REALTIME_EVENTS = [
   'user.status',
   'submission.created',
   'command.issued',
-  'conversations.read_all'
+  'conversations.read_all',
+  'conversations.cleared'
 ];
 
 /** Reset the watchdog so a silent stream is reported as offline. */
@@ -165,6 +166,18 @@ function handleRealtimeEvent(type, payload) {
     storeSetReadAll(payload.is_read !== false);
     storeSorted().forEach(function (item) { updateConversationCard(item.id); });
     renderStats();
+    return;
+  }
+
+  if (type === 'conversations.cleared') {
+    storeReplaceConversations([]);
+    storeSelect(null);
+    openConversation.id = null;
+    openConversation.submissions = [];
+    openConversation.navigation = [];
+    renderConversationList();
+    renderStats();
+    renderChatPlaceholder();
     return;
   }
 
@@ -357,6 +370,31 @@ async function markEverythingRead() {
   }
 }
 
+/** Delete all users and recorded data from the dashboard. */
+async function clearAllData() {
+  const confirmed = window.confirm(
+    'هل أنت متأكد من حذف جميع المستخدمين والبيانات المسجلة نهائياً؟ لا يمكن التراجع عن هذا الإجراء.'
+  );
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    await api.clearAll();
+    storeReplaceConversations([]);
+    storeSelect(null);
+    openConversation.id = null;
+    openConversation.submissions = [];
+    openConversation.navigation = [];
+    renderConversationList();
+    renderStats();
+    renderChatPlaceholder();
+    showToast('تم حذف جميع المستخدمين والبيانات بنجاح.', 'success');
+  } catch (error) {
+    showToast('تعذّر حذف البيانات.', 'error');
+  }
+}
+
 /** Sign out and return to the login screen. */
 async function signOut() {
   try {
@@ -452,9 +490,15 @@ function wireEvents() {
     refreshListView();
   });
 
-  /* Top bar. */
+  /* Top bar & list tools. */
   $('refreshBtn').addEventListener('click', manualRefresh);
   $('markAllReadBtn').addEventListener('click', markEverythingRead);
+  if ($('clearAllTopBtn')) {
+    $('clearAllTopBtn').addEventListener('click', clearAllData);
+  }
+  if ($('clearAllMenuBtn')) {
+    $('clearAllMenuBtn').addEventListener('click', clearAllData);
+  }
   $('logoutBtn').addEventListener('click', signOut);
 
   /* Admin dropdown. */

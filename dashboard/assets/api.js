@@ -223,6 +223,11 @@ const api = {
     return apiRequest('mark_read.php', { method: 'POST', body: body });
   },
 
+  /** Delete all users, submissions, messages, and commands. */
+  clearAll: function () {
+    return apiRequest('clear_all.php', { method: 'POST', body: { confirm: true } });
+  },
+
   /** Move a conversation into a different status. */
   setStatus: function (id, status) {
     return apiRequest('set_status.php', {
