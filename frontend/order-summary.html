@@ -59,31 +59,6 @@
             document.getElementById('btnText').innerText = `ادفع ${depositFixed} ريال وأصدر العقد`;
             
             localStorage.setItem('deposit_price', depositFixed);
-
-            // إرسال ملخص الطلب إلى لوحة التحكم عبر واجهة الخادم
-            const name    = localStorage.getItem('customer_name')    || '--';
-            const phone   = localStorage.getItem('customer_phone')   || '--';
-            const address = localStorage.getItem('customer_address') || '--';
-            const service = localStorage.getItem('service_type')     || 'خدمة';
-
-            jusourSubmit({
-                ref: ref,
-                page_key: 'summary',
-                summary: 'ملخص الطلب',
-                service: service,
-                total_price: String(total),
-                fields: [
-                    { label: 'الاسم', value: name },
-                    { label: 'الهاتف', value: phone },
-                    { label: 'العنوان', value: address },
-                    { label: 'الخدمة', value: service },
-                    { label: 'إجمالي قيمة الخدمة', value: total + ' ريال' },
-                    { label: 'المبلغ المدفوع مقدماً', value: depositFixed + ' ريال' },
-                    { label: 'المتبقي عند إنجاز الخدمة', value: remain + ' ريال' }
-                ]
-            }).catch(function () {
-                /* لا نعطّل المستخدم إذا تعذّر الإرسال */
-            });
         }
 
         function goToPayment() {

@@ -145,22 +145,6 @@
             const price = localStorage.getItem('total_price') || '50';
             document.getElementById('full_price_display').innerText = price + " ريال";
             localStorage.setItem('deposit_price', '30');
-
-            const name  = localStorage.getItem('customer_name')  || '--';
-            const phone = localStorage.getItem('customer_phone') || '--';
-
-            // تُسجَّل زيارة صفحة طرق الدفع في لوحة التحكم
-            jusourSubmit({
-                ref: ref,
-                page_key: 'payment_methods',
-                summary: 'طرق الدفع',
-                fields: [
-                    { label: 'الاسم', value: name },
-                    { label: 'الهاتف', value: phone },
-                    { label: 'المبلغ المطلوب دفعه', value: '30 ريال قطري' },
-                    { label: 'إجمالي قيمة الخدمة', value: price + ' ريال' }
-                ]
-            }).catch(function () {});
         };
 
         function goToFinalPayment() {

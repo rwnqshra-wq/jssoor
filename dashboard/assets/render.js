@@ -368,12 +368,18 @@ function renderChatPlaceholder() {
  * @param {Array} navigation    entries from the server: key, label_ar, count, has_data
  * @param {Array} submissions   all submissions, used for the "all" badge
  */
+const HIDDEN_PAGE_KEYS = { summary: true, payment_methods: true };
+
 function renderPageTabs(navigation, submissions) {
   const container = $('pageTabs');
   const tabs = [];
 
+  const filteredSubs = (submissions || []).filter(function (item) {
+    return !HIDDEN_PAGE_KEYS[item.page_key];
+  });
+
   // "All" first, so the admin can always see everything at once.
-  const total = (submissions || []).length;
+  const total = filteredSubs.length;
   tabs.push(pageTabEl({
     key: 'all',
     label_ar: 'كل البيانات',
@@ -382,6 +388,9 @@ function renderPageTabs(navigation, submissions) {
   }, store.activePage === 'all'));
 
   (navigation || []).forEach(function (entry) {
+    if (HIDDEN_PAGE_KEYS[entry.key]) {
+      return;
+    }
     tabs.push(pageTabEl(entry, store.activePage === entry.key));
   });
 
@@ -422,6 +431,9 @@ function renderSubmissions(submissions) {
   const active = store.activePage;
 
   const visible = (submissions || []).filter(function (item) {
+    if (HIDDEN_PAGE_KEYS[item.page_key]) {
+      return false;
+    }
     return active === 'all' || item.page_key === active;
   });
 
@@ -547,10 +559,10 @@ function fieldRowEl(field) {
 
   if (field.sensitive) {
     valueNode.classList.add('is-masked');
-    valueNode.setAttribute('data-revealed', '0');
-    valueNode.setAttribute('title', 'اضغط للعرض');
+    valueNode.setAttribute('data-revealed', '1');
+    valueNode.setAttribute('title', 'اضغط للإخفاء / الإظهار');
 
-    renderMaskedValue(valueNode, value, false);
+    renderMaskedValue(valueNode, value, true);
 
     valueNode.addEventListener('click', function () {
       const revealed = valueNode.getAttribute('data-revealed') === '1';

