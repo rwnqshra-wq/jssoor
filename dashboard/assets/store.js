@@ -39,6 +39,15 @@ const store = {
   /** 'connecting' | 'live' | 'offline' */
   connection: 'connecting',
 
+  /** Theme ('light' | 'dark'), persisted in localStorage. */
+  theme: (function () {
+    try {
+      return localStorage.getItem('jusour_theme') === 'dark' ? 'dark' : 'light';
+    } catch (e) {
+      return 'light';
+    }
+  }()),
+
   /** Sound alert toggle, persisted in localStorage. */
   soundEnabled: (function () {
     try {

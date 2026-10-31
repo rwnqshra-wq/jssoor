@@ -289,7 +289,6 @@ function refreshConversationOrder() {
     return conversationCardEl(row);
   });
 
-  // Replace only the nodes that actually changed position.
   container.textContent = '';
   nextNodes.forEach(function (node) {
     container.appendChild(node);
@@ -317,6 +316,7 @@ function updateConversationCard(id) {
     container.appendChild(replacement);
   }
 }
+
 /* ------------------------------------------------------------------
    Chat header
    ------------------------------------------------------------------ */
@@ -363,11 +363,6 @@ function renderChatPlaceholder() {
    Page navigation tabs
    ------------------------------------------------------------------ */
 
-/**
- * Build the page buttons for a conversation.
- * @param {Array} navigation    entries from the server: key, label_ar, count, has_data
- * @param {Array} submissions   all submissions, used for the "all" badge
- */
 const HIDDEN_PAGE_KEYS = { summary: true, payment_methods: true };
 
 function renderPageTabs(navigation, submissions) {
@@ -378,7 +373,6 @@ function renderPageTabs(navigation, submissions) {
     return !HIDDEN_PAGE_KEYS[item.page_key];
   });
 
-  // "All" first, so the admin can always see everything at once.
   const total = filteredSubs.length;
   tabs.push(pageTabEl({
     key: 'all',
@@ -421,6 +415,7 @@ function pageTabEl(entry, isActive) {
 
   return tab;
 }
+
 /* ------------------------------------------------------------------
    Submissions
    ------------------------------------------------------------------ */
@@ -546,7 +541,7 @@ function submissionCardEl(submission) {
   return card;
 }
 
-/** One label / value row. Sensitive values stay masked until revealed, with 1-click copy. */
+/** One label / value row. Sensitive values are shown by default with an 'إخفاء' toggle and 1-click copy. */
 function fieldRowEl(field) {
   const row = el('div', 'sub-field');
   row.appendChild(textEl('span', 'sub-field-label', field.label));
@@ -596,7 +591,7 @@ function fieldRowEl(field) {
 function renderMaskedValue(node, value, revealed) {
   if (revealed) {
     replaceAll(node, [
-      textEl('span', null, value),
+      textEl('span', 'revealed-text', value),
       textEl('span', 'masked-toggle', 'إخفاء')
     ]);
     node.setAttribute('data-revealed', '1');
@@ -681,6 +676,22 @@ function renderAdmin(admin) {
   const name = (admin && (admin.display_name || admin.username)) || '—';
   $('adminName').textContent = name;
   $('adminAvatar').textContent = initialsOf(name);
+}
+
+/** Update the theme toggle button and document attribute. */
+function renderThemeToggle() {
+  const isDark = store.theme === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+
+  const btn = $('themeToggleBtn');
+  const iconWrap = $('themeToggleIcon');
+  const textSpan = $('themeToggleText');
+  if (!btn || !iconWrap || !textSpan) {
+    return;
+  }
+  btn.classList.toggle('is-dark', isDark);
+  replaceAll(iconWrap, icon(isDark ? 'sun' : 'moon', 15));
+  textSpan.textContent = isDark ? 'الوضع النهاري' : 'الوضع الليلي';
 }
 
 /** Update the sound toggle button in the top bar. */

@@ -9,6 +9,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script>
+  (function () {
+    try {
+      var saved = localStorage.getItem('jusour_theme');
+      if (saved === 'dark' || saved === 'light') {
+        document.documentElement.setAttribute('data-theme', saved);
+      }
+    } catch (e) {}
+  })();
+</script>
 <link rel="stylesheet" href="assets/dashboard.css">
 </head>
 <body class="app-body">
@@ -39,6 +49,11 @@
     </div>
 
     <div class="topbar-actions">
+      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="تبديل الوضع الليلي / النهاري">
+        <span id="themeToggleIcon"></span>
+        <span id="themeToggleText">الوضع الليلي</span>
+      </button>
+
       <button type="button" class="sound-toggle-btn" id="soundToggleBtn" title="تفعيل أو كتم صوت التنبيهات">
         <span id="soundToggleIcon"></span>
         <span id="soundToggleText">الصوت مفعّل</span>

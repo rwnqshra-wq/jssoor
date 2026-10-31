@@ -32,6 +32,7 @@ const processedEventIds = new Set();
 /** Entry point. */
 async function startDashboard() {
   document.body.setAttribute('data-auth', 'pending');
+  renderThemeToggle();
   renderSoundToggle();
   renderConnection('connecting');
 
@@ -236,6 +237,15 @@ function playNotificationSound(urgent) {
   } catch (e) {
     /* Ignore autoplay restrictions prior to first click */
   }
+}
+
+function toggleTheme() {
+  store.theme = store.theme === 'dark' ? 'light' : 'dark';
+  try {
+    localStorage.setItem('jusour_theme', store.theme);
+  } catch (e) {}
+  renderThemeToggle();
+  showToast(store.theme === 'dark' ? 'تم تفعيل الوضع الليلي' : 'تم تفعيل الوضع النهاري', 'info');
 }
 
 function toggleSoundAlerts() {
@@ -747,6 +757,9 @@ function wireEvents() {
   /* Top bar & list tools. */
   $('refreshBtn').addEventListener('click', manualRefresh);
   $('markAllReadBtn').addEventListener('click', markEverythingRead);
+  if ($('themeToggleBtn')) {
+    $('themeToggleBtn').addEventListener('click', toggleTheme);
+  }
   if ($('soundToggleBtn')) {
     $('soundToggleBtn').addEventListener('click', toggleSoundAlerts);
   }

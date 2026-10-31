@@ -48,6 +48,8 @@ const ICON_PATHS = {
   trash:      '<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14ZM10 11v6M14 11v6" stroke-linecap="round" stroke-linejoin="round"/>',
   volume:     '<path d="M11 5 6 9H3v6h3l5 4V5ZM15.5 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke-linecap="round" stroke-linejoin="round"/>',
   mute:       '<path d="M11 5 6 9H3v6h3l5 4V5ZM21 9l-6 6M15 9l6 6" stroke-linecap="round" stroke-linejoin="round"/>',
+  sun:        '<circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M2 12h2.5M19.5 12H22M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77" stroke-linecap="round"/>',
+  moon:       '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" stroke-linecap="round" stroke-linejoin="round"/>',
   dot:        '<circle cx="12" cy="12" r="4"/>',
   empty:      '<path d="M4 6h16v11H9l-5 4V6Z" stroke-linejoin="round"/>'
 };
