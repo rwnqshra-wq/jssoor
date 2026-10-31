@@ -1,162 +1,556 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الشركة القطرية لحلول القوى البشرية | جسور</title>
+    <link rel="icon" href="favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="config.js"></script>
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #ffffff; }
-        .card-service { border: 1px solid #f3f4f6; border-radius: 12px; transition: 0.3s; background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
-        .card-service:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .step-box { background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); text-align: center; position: relative; }
-        .step-num { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 35px; height: 35px; background: #8D1B3D; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 4px solid #fff; }
+        :root {
+            --brand: #8D1B3D;
+            --brand-dark: #5C0F26;
+            --gold: #D4AF37;
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #FAF8F6;
+            color: #1A1617;
+            overflow-x: hidden;
+        }
+        .hero-mesh {
+            background:
+                radial-gradient(circle at 15% 20%, rgba(212, 175, 55, 0.16) 0%, transparent 45%),
+                radial-gradient(circle at 85% 80%, rgba(141, 27, 61, 0.25) 0%, transparent 50%),
+                linear-gradient(135deg, #4A0B1D 0%, #8D1B3D 55%, #6B122C 100%);
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+        .service-card {
+            transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease;
+        }
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 22px 45px -12px rgba(141, 27, 61, 0.14);
+        }
     </style>
+
     <!-- الوسوم المسؤولة عن شكل الرابط في واتساب -->
-<meta property="og:title" content="الشركة القطرية لحلول القوى البشرية | جسور">
-<meta property="og:description" content="خدمات العمالة المنزلية في قطر - عمالة بالساعة والشهر واستقدام العمالة المنزلية بنظام آمن وموثوق.">
-<meta property="og:image" content="https://jusourqrr.com/assets/jusoor-thumb.jpg">
-<meta property="og:url" content="https://jusourqrr.com">
-<meta property="og:type" content="website">
-
-<!-- وسوم إضافية لتويتر وجوجل -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="description" content="خدمات العمالة المنزلية في قطر - عمالة بالساعة والشهر واستقدام العمالة المنزلية بنظام آمن وموثوق.">
+    <meta property="og:title" content="الشركة القطرية لحلول القوى البشرية | جسور">
+    <meta property="og:description" content="خدمات العمالة المنزلية في قطر - عمالة بالساعة والشهر واستقدام العمالة المنزلية بنظام آمن وموثوق.">
+    <meta property="og:image" content="https://jusourqrr.com/assets/jusoor-thumb.jpg">
+    <meta property="og:url" content="https://jusourqrr.com">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="description" content="خدمات العمالة المنزلية في قطر - عمالة بالساعة والشهر واستقدام العمالة المنزلية بنظام آمن وموثوق.">
 </head>
-<body class="text-[#1a1a1a]">
+<body class="antialiased selection:bg-[#8D1B3D] selection:text-white">
 
-    <!-- Navbar -->
-    <nav class="bg-white border-b border-gray-100 h-[70px] flex items-center px-[6%] justify-between sticky top-0 z-50">
-        <div class="flex items-center gap-2">
-            <div class="bg-[#8D1B3D] w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg">ج</div>
-            <div class="text-right leading-none">
-                <span class="text-[#8D1B3D] font-bold text-[18px] block">جسور</span>
-                <span class="text-[9px] text-gray-400 uppercase tracking-tighter">Qatar Manpower Solutions Co.</span>
+    <!-- Top Announcement Bar -->
+    <div class="bg-[#4A0B1D] text-white/90 text-xs sm:text-sm py-2.5 px-4 border-b border-white/10">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 font-semibold">
+                <span class="inline-block w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse"></span>
+                <span>منصة معتمدة ومرخصة رسمياً من وزارة العمل في دولة قطر</span>
+            </div>
+            <div class="hidden sm:flex items-center gap-4 text-xs text-white/75 font-medium">
+                <span>دعم متواصل 24/7</span>
+                <span>•</span>
+                <span>الدوحة، قطر</span>
             </div>
         </div>
-        <div class="hidden lg:flex gap-8 text-[14px] font-semibold text-gray-600">
-            <a href="index.html" class="text-[#8D1B3D] border-b-2 border-[#8D1B3D] pb-1">الرئيسية</a>
-            <a href="hourly.html">عمالة بالساعة</a>
-            <a href="monthly.html">عمالة بالشهر</a>
-            <a href="recruitment.html">استقدام عمالة</a>
-            <a href="#">EN</a>
+    </div>
+
+    <!-- Sticky Navbar -->
+    <header class="glass-nav border-b border-stone-200/80 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Brand -->
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-[#8D1B3D] to-[#5C0F26] flex items-center justify-center text-white font-black text-xl shadow-md shadow-[#8D1B3D]/20 group-hover:scale-105 transition-transform">
+                    ج
+                </div>
+                <div class="text-right">
+                    <span class="text-[#8D1B3D] font-black text-xl sm:text-2xl block leading-tight">جسور</span>
+                    <span class="text-[10px] sm:text-[11px] text-stone-500 font-bold tracking-tight block">الشركة القطرية لحلول القوى البشرية</span>
+                </div>
+            </a>
+
+            <!-- Desktop Links -->
+            <nav class="hidden lg:flex items-center gap-8 text-[15px] font-bold text-stone-700">
+                <a href="index.html" class="text-[#8D1B3D] relative after:content-[''] after:absolute after:-bottom-1.5 after:right-0 after:w-full after:h-0.5 after:bg-[#8D1B3D] after:rounded-full">الرئيسية</a>
+                <a href="hourly.html" class="hover:text-[#8D1B3D] transition-colors">عمالة بالساعة</a>
+                <a href="monthly.html" class="hover:text-[#8D1B3D] transition-colors">عمالة بالشهر</a>
+                <a href="recruitment.html" class="hover:text-[#8D1B3D] transition-colors">استقدام عمالة</a>
+                <a href="#how-it-works" class="hover:text-[#8D1B3D] transition-colors">خطوات الحجز</a>
+                <a href="#why-jusour" class="hover:text-[#8D1B3D] transition-colors">لماذا جسور؟</a>
+            </nav>
+
+            <!-- CTA + Mobile Menu Button -->
+            <div class="flex items-center gap-3">
+                <a href="#services" class="hidden sm:inline-flex items-center gap-2 bg-[#8D1B3D] hover:bg-[#6e1430] text-white text-sm font-extrabold px-5 py-2.5 rounded-xl shadow-sm transition-all">
+                    <span>احجز خدمتك الآن</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m6-6-6 6 6 6"/></svg>
+                </a>
+
+                <button id="mobileMenuBtn" type="button" aria-label="القائمة" class="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-xl border border-stone-200 bg-white text-stone-700 hover:text-[#8D1B3D] hover:border-[#8D1B3D] transition-colors">
+                    <svg id="menuOpenIcon" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h12"/></svg>
+                    <svg id="menuCloseIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
         </div>
-        <div class="text-[12px] font-bold text-gray-500">خدمات العمالة المنزلية</div>
-    </nav>
+
+        <!-- Mobile Dropdown Drawer -->
+        <div id="mobileMenu" class="lg:hidden hidden border-t border-stone-200/80 bg-white px-4 pt-3 pb-5 space-y-2 shadow-xl">
+            <a href="index.html" class="block px-4 py-3 rounded-xl bg-[#8D1B3D]/10 text-[#8D1B3D] font-extrabold text-sm">الرئيسية</a>
+            <a href="hourly.html" class="block px-4 py-3 rounded-xl hover:bg-stone-100 text-stone-800 font-bold text-sm">🕒 عمالة منزلية بالساعة</a>
+            <a href="monthly.html" class="block px-4 py-3 rounded-xl hover:bg-stone-100 text-stone-800 font-bold text-sm">📅 عمالة منزلية بالشهر</a>
+            <a href="recruitment.html" class="block px-4 py-3 rounded-xl hover:bg-stone-100 text-stone-800 font-bold text-sm">👥 استقدام عمالة منزلية</a>
+            <div class="pt-2 grid grid-cols-2 gap-2">
+                <a href="hourly.html" class="text-center bg-[#8D1B3D] text-white font-extrabold text-xs py-3 rounded-xl">حجز بالساعة</a>
+                <a href="monthly.html" class="text-center border border-[#8D1B3D] text-[#8D1B3D] font-extrabold text-xs py-3 rounded-xl">عقود شهرية</a>
+            </div>
+        </div>
+    </header>
 
     <!-- Hero Section -->
-    <section class="text-center py-16 px-4">
-        <h1 class="text-[#3c102a] text-[34px] md:text-[44px] font-black mb-4">الشركة القطرية لحلول القوى البشرية</h1>
-        <h2 class="text-[#8D1B3D] text-[32px] font-bold mb-6">جسور</h2>
-        <p class="text-gray-400 text-[18px] max-w-[600px] mx-auto leading-relaxed">نقدم أفضل خدمات العمالة المنزلية في قطر مع ضمان الجودة والكفاءة</p>
-    </section>
+    <section class="hero-mesh relative text-white overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20 lg:py-24">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
 
-    <!-- Services -->
-    <section class="bg-gray-50/50 py-16">
-        <div class="max-w-[1100px] mx-auto px-4">
-            <div class="text-center mb-12">
-                <h3 class="text-[26px] font-black mb-2">خدماتنا</h3>
-                <p class="text-gray-400">اختر الخدمة المناسبة لاحتياجاتك</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- بالساعة -->
-                <div class="card-service p-8 text-center flex flex-col justify-between h-full">
-                    <div>
-                        <div class="w-14 h-14 bg-[#8D1B3D]/10 text-[#8D1B3D] rounded-xl flex items-center justify-center mx-auto mb-6 text-2xl">🕒</div>
-                        <h4 class="text-[19px] font-black mb-3">عمالة منزلية بالساعة</h4>
-                        <p class="text-[13px] text-gray-400 leading-relaxed mb-4">خدمة مرنة للتنظيف، والطبخ، ورعاية كبار السن والأطفال</p>
-                        <b class="text-[#8D1B3D] block mb-6">ابتداءً من 40 ريال</b>
+                <!-- Hero Text Column -->
+                <div class="lg:col-span-7 text-center lg:text-right">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-sm text-xs sm:text-sm font-bold text-[#F6E299] mb-6">
+                        <span>✨ الخيار الأول للعمالة المنزلية الموثوقة في قطر</span>
                     </div>
-                    <a href="hourly.html" class="w-full border border-[#8D1B3D] text-[#8D1B3D] py-3 rounded-lg font-bold text-[14px] hover:bg-[#8D1B3D] hover:text-white transition-all">اختر هذه الخدمة ←</a>
+
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-[52px] font-black leading-[1.22] mb-5">
+                        الشركة القطرية لحلول القوى البشرية
+                        <span class="block text-[#F6E299] mt-2">جسور — راحة بيتك بأيدٍ أمينة</span>
+                    </h1>
+
+                    <p class="text-white/85 text-base sm:text-lg lg:text-xl max-w-2xl mx-auto lg:mx-0 leading-relaxed mb-8 font-medium">
+                        نوفر لك حلولاً متكاملة ومرنة للعمالة المنزلية المرخصة والمدربة في كافة مناطق قطر، سواء بنظام الساعات، العقود الشهرية، أو الاستقدام المباشر بضمان كامل.
+                    </p>
+
+                    <!-- Hero CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3.5 sm:gap-4">
+                        <a href="#services" class="inline-flex items-center justify-center gap-3 bg-white text-[#8D1B3D] hover:bg-[#FAF3E0] font-black text-base px-8 py-4 rounded-2xl shadow-lg shadow-black/20 transition-all">
+                            <span>اختر الخدمة المناسبة</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m6-6-6 6 6 6"/></svg>
+                        </a>
+                        <a href="hourly.html" class="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/25 text-white font-bold text-base px-7 py-4 rounded-2xl backdrop-blur-sm transition-all">
+                            <span>حجز سريع بالساعة (من 40 ريال)</span>
+                        </a>
+                    </div>
+
+                    <!-- Quick Trust Pills -->
+                    <div class="mt-9 pt-8 border-t border-white/15 grid grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0 text-center lg:text-right">
+                        <div>
+                            <div class="text-2xl sm:text-3xl font-black text-[#F6E299]">98%</div>
+                            <div class="text-xs sm:text-sm text-white/75 font-semibold mt-0.5">نسبة رضا العملاء</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl sm:text-3xl font-black text-[#F6E299]">+20</div>
+                            <div class="text-xs sm:text-sm text-white/75 font-semibold mt-0.5">جنسية معتمدة</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl sm:text-3xl font-black text-[#F6E299]">24/7</div>
+                            <div class="text-xs sm:text-sm text-white/75 font-semibold mt-0.5">خدمة ودعم فوري</div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- بالشهر -->
-                <div class="card-service p-8 text-center flex flex-col justify-between h-full">
-                    <div>
-                        <div class="w-14 h-14 bg-[#8D1B3D]/10 text-[#8D1B3D] rounded-xl flex items-center justify-center mx-auto mb-6 text-2xl">📅</div>
-                        <h4 class="text-[19px] font-black mb-3">عمالة منزلية بالشهر</h4>
-                        <p class="text-[13px] text-gray-400 leading-relaxed mb-4">عقود شهرية وسنوية مع عمالة مدربة ومختارة بعناية</p>
-                        <b class="text-[#8D1B3D] block mb-6">ابتداءً من 1100 ريال</b>
+                <!-- Hero Quick-Selector Card (Desktop & Mobile) -->
+                <div class="lg:col-span-5">
+                    <div class="bg-white text-stone-900 rounded-3xl p-6 sm:p-8 shadow-2xl border border-white/40 relative">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-stone-100">
+                            <div>
+                                <span class="text-xs font-extrabold text-[#8D1B3D] bg-[#8D1B3D]/10 px-3 py-1 rounded-full">حجز إلكتروني فوري</span>
+                                <h2 class="text-xl sm:text-2xl font-black mt-2 text-stone-900">ابدأ طلبك في دقيقة</h2>
+                            </div>
+                            <img src="assets/logo-labor.png" alt="وزارة العمل" class="h-10 sm:h-11 object-contain">
+                        </div>
+
+                        <div class="space-y-3.5">
+                            <!-- Option 1: Hourly -->
+                            <a href="hourly.html" class="group flex items-center justify-between p-4 rounded-2xl border-2 border-stone-100 hover:border-[#8D1B3D] bg-stone-50/70 hover:bg-[#8D1B3D]/[0.03] transition-all">
+                                <div class="flex items-center gap-3.5">
+                                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center text-2xl shrink-0">🕒</div>
+                                    <div>
+                                        <h3 class="font-extrabold text-base text-stone-900 group-hover:text-[#8D1B3D] transition-colors">عمالة منزلية بالساعة</h3>
+                                        <p class="text-xs text-stone-500 font-semibold mt-0.5">تنظيف، طبخ، ورعاية — زيارات مرنة</p>
+                                    </div>
+                                </div>
+                                <div class="text-left shrink-0">
+                                    <span class="block text-xs text-stone-400 font-bold">ابتداءً من</span>
+                                    <span class="font-black text-[#8D1B3D] text-base">40 ر.ق</span>
+                                </div>
+                            </a>
+
+                            <!-- Option 2: Monthly -->
+                            <a href="monthly.html" class="group flex items-center justify-between p-4 rounded-2xl border-2 border-[#8D1B3D]/30 hover:border-[#8D1B3D] bg-[#8D1B3D]/[0.04] transition-all relative">
+                                <span class="absolute -top-2.5 left-4 bg-[#8D1B3D] text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">الأكثر طلباً</span>
+                                <div class="flex items-center gap-3.5">
+                                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D] text-white flex items-center justify-center text-2xl shrink-0">📅</div>
+                                    <div>
+                                        <h3 class="font-extrabold text-base text-stone-900 group-hover:text-[#8D1B3D] transition-colors">عمالة منزلية بالشهر</h3>
+                                        <p class="text-xs text-stone-500 font-semibold mt-0.5">عقود شهرية وسنوية بإشراف كامل</p>
+                                    </div>
+                                </div>
+                                <div class="text-left shrink-0">
+                                    <span class="block text-xs text-stone-400 font-bold">ابتداءً من</span>
+                                    <span class="font-black text-[#8D1B3D] text-base">1100 ر.ق</span>
+                                </div>
+                            </a>
+
+                            <!-- Option 3: Recruitment -->
+                            <a href="recruitment.html" class="group flex items-center justify-between p-4 rounded-2xl border-2 border-stone-100 hover:border-[#8D1B3D] bg-stone-50/70 hover:bg-[#8D1B3D]/[0.03] transition-all">
+                                <div class="flex items-center gap-3.5">
+                                    <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-700 flex items-center justify-center text-2xl shrink-0">🌍</div>
+                                    <div>
+                                        <h3 class="font-extrabold text-base text-stone-900 group-hover:text-[#8D1B3D] transition-colors">استقدام عمالة منزلية</h3>
+                                        <p class="text-xs text-stone-500 font-semibold mt-0.5">استقدام حسب المواصفات والجنسية</p>
+                                    </div>
+                                </div>
+                                <div class="text-left shrink-0">
+                                    <span class="inline-block bg-stone-200/80 text-stone-700 font-extrabold text-xs px-3 py-1 rounded-full">خدمة مخصصة</span>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="mt-5 pt-4 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500 font-bold">
+                            <span>🔒 دفع إلكتروني آمن ومعتمد</span>
+                            <span>⚡ تأكيد فوري للطلب</span>
+                        </div>
                     </div>
-                    <a href="monthly.html" class="w-full border border-[#8D1B3D] text-[#8D1B3D] py-3 rounded-lg font-bold text-[14px] hover:bg-[#8D1B3D] hover:text-white transition-all">اختر هذه الخدمة ←</a>
                 </div>
 
-                <!-- استقدام (تم التفعيل هنا) -->
-                <div class="card-service p-8 text-center flex flex-col justify-between h-full">
-                    <div>
-                        <div class="w-14 h-14 bg-[#8D1B3D]/10 text-[#8D1B3D] rounded-xl flex items-center justify-center mx-auto mb-6 text-2xl">👨‍👩‍👧‍👦</div>
-                        <h4 class="text-[19px] font-black mb-3">استقدام عمالة منزلية</h4>
-                        <p class="text-[13px] text-gray-400 leading-relaxed mb-4">استقدام عمالة منزلية من مختلف الجنسيات حسب رغبتكم</p>
-                        <b class="text-[#8D1B3D] block mb-6 px-4 py-1.5 bg-[#8D1B3D]/5 rounded-full inline-block">خدمة مخصصة</b>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Services Section -->
+    <section id="services" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+            <span class="inline-block text-xs sm:text-sm font-extrabold text-[#8D1B3D] bg-[#8D1B3D]/10 px-4 py-1.5 rounded-full mb-3">باقاتنا وخدماتنا</span>
+            <h2 class="text-2xl sm:text-4xl font-black text-stone-900 mb-3">اختر الخدمة التي تناسب أسرتك</h2>
+            <p class="text-stone-500 text-sm sm:text-base font-medium leading-relaxed">
+                كافة الكوادر البشرية لدينا تخضع للفحص الطبي والتدريب المهني المعتمد لضمان أعلى مستويات الأمان والجودة
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
+
+            <!-- Card 1: Hourly -->
+            <div class="service-card bg-white rounded-3xl p-6 sm:p-8 border border-stone-200/90 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-14 h-14 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center text-3xl">🕒</div>
+                        <span class="text-xs font-extrabold text-stone-500 bg-stone-100 px-3 py-1 rounded-full">زيارات يومية مرنة</span>
                     </div>
-                    <!-- الرابط المفعل -->
-                    <a href="recruitment.html" class="w-full border border-[#8D1B3D] text-[#8D1B3D] py-3 rounded-lg font-bold text-[14px] hover:bg-[#8D1B3D] hover:text-white transition-all">اختر هذه الخدمة ←</a>
+
+                    <h3 class="text-xl sm:text-2xl font-black text-stone-900 mb-2">عمالة منزلية بالساعة</h3>
+                    <p class="text-sm text-stone-500 font-medium leading-relaxed mb-6">
+                        خدمة سريعة ومرنة للتنظيف الشامل، الضيافة، الطبخ، ورعاية الأطفال وكبار السن بالساعات.
+                    </p>
+
+                    <div class="bg-[#FAF8F6] border border-stone-200/70 rounded-2xl p-4 mb-6 flex items-baseline justify-between">
+                        <span class="text-xs font-bold text-stone-500">تبدأ الأسعار من</span>
+                        <div>
+                            <span class="text-2xl sm:text-3xl font-black text-[#8D1B3D]">40</span>
+                            <span class="text-xs font-extrabold text-stone-600">ريال / الساعة</span>
+                        </div>
+                    </div>
+
+                    <ul class="space-y-3 text-sm text-stone-700 font-semibold mb-8">
+                        <li class="flex items-center gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">✓</span>
+                            <span>اختيار عدد الساعات والعاملات بمرونة</span>
+                        </li>
+                        <li class="flex items-center gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">✓</span>
+                            <span>توصيل مجاني إلى كافة مناطق قطر</span>
+                        </li>
+                        <li class="flex items-center gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">✓</span>
+                            <span>فترات صباحية ومسائية طوال الأسبوع</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <a href="hourly.html" class="w-full inline-flex items-center justify-center gap-2 py-4 px-6 rounded-2xl border-2 border-[#8D1B3D] text-[#8D1B3D] hover:bg-[#8D1B3D] hover:text-white font-black text-sm sm:text-base transition-all">
+                    <span>احجز بالساعة الآن</span>
+                    <span>←</span>
+                </a>
+            </div>
+
+            <!-- Card 2: Monthly (Featured) -->
+            <div class="service-card bg-gradient-to-b from-[#5C0F26] to-[#8D1B3D] text-white rounded-3xl p-6 sm:p-8 border-2 border-[#8D1B3D] shadow-xl flex flex-col justify-between relative">
+                <div class="absolute -top-3.5 right-6 bg-[#D4AF37] text-stone-950 text-xs font-black px-4 py-1 rounded-full shadow">
+                    ⭐ الباقة الأكثر طلباً
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-14 h-14 rounded-2xl bg-white/15 text-white flex items-center justify-center text-3xl">📅</div>
+                        <span class="text-xs font-extrabold text-[#F6E299] bg-white/10 px-3 py-1 rounded-full">عقود مقيمة أو يومية</span>
+                    </div>
+
+                    <h3 class="text-xl sm:text-2xl font-black mb-2">عمالة منزلية بالشهر</h3>
+                    <p class="text-sm text-white/80 font-medium leading-relaxed mb-6">
+                        عقود شهرية وسنوية مريحة مع عاملات مدربات ومختارات بعناية لتلبية كافة احتياجات المنزل.
+                    </p>
+
+                    <div class="bg-white/10 border border-white/15 rounded-2xl p-4 mb-6 flex items-baseline justify-between">
+                        <span class="text-xs font-bold text-white/80">تبدأ الباقات من</span>
+                        <div>
+                            <span class="text-2xl sm:text-3xl font-black text-[#F6E299]">1100</span>
+                            <span class="text-xs font-extrabold text-white/90">ريال / شهرياً</span>
+                        </div>
+                    </div>
+
+                    <ul class="space-y-3 text-sm text-white/90 font-semibold mb-8">
+                        <li class="flex items-center gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-[#D4AF37] text-stone-950 flex items-center justify-center text-xs font-black">✓</span>
+                            <span>ضمان استبدال فوري ومجاني طوال العقد</span>
+                        </li>
+                        <li class="flex items-center gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-[#D4AF37] text-stone-950 flex items-center justify-center text-xs font-black">✓</span>
+                            <span>متابعة دورية وإشراف مباشر من الشركة</span>
+                        </li>
+                        <li class="flex items-center gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-[#D4AF37] text-stone-950 flex items-center justify-center text-xs font-black">✓</span>
+                            <span>جنسيات متعددة بخبرات عالية في التدبير</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <a href="monthly.html" class="w-full inline-flex items-center justify-center gap-2 py-4 px-6 rounded-2xl bg-white text-[#8D1B3D] hover:bg-[#FAF3E0] font-black text-sm sm:text-base shadow-lg transition-all">
+                    <span>احجز عقد شهري الآن</span>
+                    <span>←</span>
+                </a>
+            </div>
+
+            <!-- Card 3: Recruitment -->
+            <div class="service-card bg-white rounded-3xl p-6 sm:p-8 border border-stone-200/90 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-14 h-14 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center text-3xl">👨‍👩‍👧‍👦</div>
+                        <span class="text-xs font-extrabold text-stone-500 bg-stone-100 px-3 py-1 rounded-full">كفالة خاصة</span>
+                    </div>
+
+                    <h3 class="text-xl sm:text-2xl font-black text-stone-900 mb-2">استقدام عمالة منزلية</h3>
+                    <p class="text-sm text-stone-500 font-medium leading-relaxed mb-6">
+                        استقدام عمالة منزلية من مختلف الجنسيات المعتمدة وفق المواصفات والخبرات التي تختارونها.
+                    </p>
+
+                    <div class="bg-[#FAF8F6] border border-stone-200/70 rounded-2xl p-4 mb-6 flex items-center justify-between">
+                        <span class="text-xs font-bold text-stone-500">نظام الخدمة</span>
+                        <span class="text-sm font-black text-[#8D1B3D] bg-[#8D1B3D]/10 px-3.5 py-1 rounded-full">خدمة مخصصة حسب الطلب</span>
+                    </div>
+
+                    <ul class="space-y-3 text-sm text-stone-700 font-semibold mb-8">
+                        <li class="flex items-center gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">✓</span>
+                            <span>اختيار السيرة الذاتية والجنسية والمهنة</span>
+                        </li>
+                        <li class="flex items-center gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">✓</span>
+                            <span>إنهاء كافة إجراءات التأشيرة والفحص الطبي</span>
+                        </li>
+                        <li class="flex items-center gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">✓</span>
+                            <span>توثيق العقود رسمياً مع فترة ضمان شاملة</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <a href="recruitment.html" class="w-full inline-flex items-center justify-center gap-2 py-4 px-6 rounded-2xl border-2 border-[#8D1B3D] text-[#8D1B3D] hover:bg-[#8D1B3D] hover:text-white font-black text-sm sm:text-base transition-all">
+                    <span>تقديم طلب استقدام</span>
+                    <span>←</span>
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-16 sm:py-20 bg-white border-y border-stone-200/70">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-xl mx-auto mb-12 sm:mb-16">
+                <span class="inline-block text-xs sm:text-sm font-extrabold text-[#8D1B3D] bg-[#8D1B3D]/10 px-4 py-1.5 rounded-full mb-3">خطوات بسيطة وسريعة</span>
+                <h2 class="text-2xl sm:text-3xl font-black text-stone-900">كيف تحجز خدمتك عبر جسور؟</h2>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-[#FAF8F6] rounded-3xl p-6 border border-stone-200/70 relative">
+                    <div class="w-11 h-11 rounded-2xl bg-[#8D1B3D] text-white font-black text-lg flex items-center justify-center mb-4 shadow-md shadow-[#8D1B3D]/20">1</div>
+                    <h3 class="text-lg font-black text-stone-900 mb-2">اختر الخدمة</h3>
+                    <p class="text-xs sm:text-sm text-stone-500 font-medium leading-relaxed">حدد نوع الخدمة المناسبة لك: عمالة بالساعة، عقد شهري، أو طلب استقدام.</p>
+                </div>
+
+                <div class="bg-[#FAF8F6] rounded-3xl p-6 border border-stone-200/70 relative">
+                    <div class="w-11 h-11 rounded-2xl bg-[#8D1B3D] text-white font-black text-lg flex items-center justify-center mb-4 shadow-md shadow-[#8D1B3D]/20">2</div>
+                    <h3 class="text-lg font-black text-stone-900 mb-2">حدد الموعد والتفاصيل</h3>
+                    <p class="text-xs sm:text-sm text-stone-500 font-medium leading-relaxed">اختر التاريخ والوقت والجنسية أو عدد الساعات بما يناسب جدولك.</p>
+                </div>
+
+                <div class="bg-[#FAF8F6] rounded-3xl p-6 border border-stone-200/70 relative">
+                    <div class="w-11 h-11 rounded-2xl bg-[#8D1B3D] text-white font-black text-lg flex items-center justify-center mb-4 shadow-md shadow-[#8D1B3D]/20">3</div>
+                    <h3 class="text-lg font-black text-stone-900 mb-2">أدخل بيانات التواصل</h3>
+                    <p class="text-xs sm:text-sm text-stone-500 font-medium leading-relaxed">أضف الاسم ورقم الجوال والعنوان في قطر لإتمام الحجز بسهولة.</p>
+                </div>
+
+                <div class="bg-[#FAF8F6] rounded-3xl p-6 border border-stone-200/70 relative">
+                    <div class="w-11 h-11 rounded-2xl bg-[#8D1B3D] text-white font-black text-lg flex items-center justify-center mb-4 shadow-md shadow-[#8D1B3D]/20">4</div>
+                    <h3 class="text-lg font-black text-stone-900 mb-2">التأكيد والتنفيذ</h3>
+                    <p class="text-xs sm:text-sm text-stone-500 font-medium leading-relaxed">يتم تأكيد طلبك فوراً وتوجيه الكادر المختص إلى عنوانك في الموعد المحدد.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- باقي المحتوى كما هو -->
-    <section class="py-20 bg-gradient-to-b from-white to-gray-50">
-        <div class="max-w-[1100px] mx-auto px-4">
-            <h3 class="text-center text-[26px] font-black mb-16">كيف تحجز خدمتنا؟</h3>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="step-box"><div class="step-num">1</div><h5 class="font-bold mb-3 mt-4">اختر الخدمة</h5><p class="text-[11px] text-gray-400 leading-relaxed">حدد نوع الخدمة المناسبة لك - بالساعة أو بالشهر أو استقدام</p></div>
-                <div class="step-box"><div class="step-num">2</div><h5 class="font-bold mb-3 mt-4">حدد التاريخ والوقت</h5><p class="text-[11px] text-gray-400 leading-relaxed">اختر الموعد المناسب لجدولك من خلال نظام الحجز المرن</p></div>
-                <div class="step-box"><div class="step-num">3</div><h5 class="font-bold mb-3 mt-4">أدخل بياناتك</h5><p class="text-[11px] text-gray-400 leading-relaxed">أضف معلومات التواصل وأي تعليمات خاصة لتخصيص الخدمة</p></div>
-                <div class="step-box"><div class="step-num">4</div><h5 class="font-bold mb-3 mt-4">أرسل واسترح</h5><p class="text-[11px] text-gray-400 leading-relaxed">سيتواصل فريقنا معك لتأكيد الموعد والاعتناء بالباقي</p></div>
+    <!-- Why Choose Us + Ministry License Banner -->
+    <section id="why-jusour" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+
+            <div class="lg:col-span-5 text-center lg:text-right">
+                <span class="inline-block text-xs sm:text-sm font-extrabold text-[#8D1B3D] bg-[#8D1B3D]/10 px-4 py-1.5 rounded-full mb-3">لماذا تختار جسور؟</span>
+                <h2 class="text-2xl sm:text-4xl font-black text-stone-900 leading-tight mb-4">
+                    معايير حكومية معتمدة وجودة تليق ببيتك
+                </h2>
+                <p class="text-stone-500 text-sm sm:text-base font-medium leading-relaxed mb-8">
+                    نلتزم في الشركة القطرية لحلول القوى البشرية (جسور) بأعلى معايير الانتقاء والتدريب والمتابعة المستمرة لضمان راحة بالك.
+                </p>
+
+                <!-- Official Ministry Badge Card -->
+                <div class="bg-white p-5 rounded-3xl border border-stone-200 shadow-sm inline-flex items-center gap-4 text-right">
+                    <img src="assets/logo-labor.png" class="h-12 sm:h-14 object-contain" alt="وزارة العمل قطر">
+                    <div class="border-r border-stone-200 pr-4">
+                        <div class="text-sm sm:text-base font-black text-stone-900">مرخصة ومعتمدة رسمياً</div>
+                        <div class="text-xs text-stone-500 font-bold mt-0.5">وزارة العمل — دولة قطر</div>
+                    </div>
+                </div>
             </div>
+
+            <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                <div class="bg-white p-6 rounded-3xl border border-stone-200/80 flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center text-xl shrink-0">🛡️</div>
+                    <div>
+                        <h3 class="font-extrabold text-base text-stone-900 mb-1">موثوقية وأمان تام</h3>
+                        <p class="text-xs sm:text-sm text-stone-500 font-medium leading-relaxed">كوادر مفحوصة طبياً وأمنياً ومدربة على أعلى مستوى من الأمانة والمهنية.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-stone-200/80 flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center text-xl shrink-0">⚡</div>
+                    <div>
+                        <h3 class="font-extrabold text-base text-stone-900 mb-1">سرعة الاستجابة 24/7</h3>
+                        <p class="text-xs sm:text-sm text-stone-500 font-medium leading-relaxed">فريق خدمة عملاء متخصص جاهز لخدمتكم ومتابعة طلباتكم على مدار الساعة.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-stone-200/80 flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center text-xl shrink-0">⭐</div>
+                    <div>
+                        <h3 class="font-extrabold text-base text-stone-900 mb-1">ضمان الرضا والاستبدال</h3>
+                        <p class="text-xs sm:text-sm text-stone-500 font-medium leading-relaxed">نضمن رضاك الكامل عن الخدمة مع إمكانية الاستبدال الفوري دون أي تعقيد.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-stone-200/80 flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center text-xl shrink-0">💳</div>
+                    <div>
+                        <h3 class="font-extrabold text-base text-stone-900 mb-1">أسعار تنافسية وشفافة</h3>
+                        <p class="text-xs sm:text-sm text-stone-500 font-medium leading-relaxed">باقات واضحة بدون رسوم مخفية وخيارات دفع إلكترونية آمنة ومعتمدة.</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </section>
 
-    <div class="max-w-[1100px] mx-auto px-4 py-16 grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
-        <div><h5 class="font-bold mb-2">موثوقية عالية</h5><p class="text-[12px] text-gray-400">عمالة مدربة ومؤهلة</p></div>
-        <div><h5 class="font-bold mb-2">خدمة 24/7</h5><p class="text-[12px] text-gray-400">دعم متواصل</p></div>
-        <div><h5 class="font-bold mb-2">أسعار تنافسية</h5><p class="text-[12px] text-gray-400">أفضل الأسعار في السوق</p></div>
-    </div>
+    <!-- Footer -->
+    <footer class="bg-[#4A0B1D] text-white pt-14 pb-24 sm:pb-10 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 pb-10 border-b border-white/10 text-right">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-white text-[#8D1B3D] flex items-center justify-center font-black text-lg">ج</div>
+                        <div>
+                            <h4 class="text-lg font-black leading-none">جسور</h4>
+                            <span class="text-[11px] text-white/65 font-semibold">الشركة القطرية لحلول القوى البشرية</span>
+                        </div>
+                    </div>
+                    <p class="text-xs sm:text-sm text-white/75 leading-relaxed max-w-sm">
+                        المنصة الرائدة في دولة قطر لتقديم خدمات العمالة المنزلية بالساعة وبالشهر والاستقدام وفق أعلى معايير الجودة.
+                    </p>
+                </div>
 
-    <div class="flex flex-col items-center justify-center py-10 opacity-70 border-t border-gray-100">
-        <div class="bg-gray-50 px-8 py-3 rounded-xl border border-gray-100 flex items-center gap-4">
-            <img src="assets/logo-labor.png" class="h-10" alt="Qatar Labor">
-            <div class="text-[11px] text-gray-500 font-bold border-r pr-4 border-gray-300">مرخصة من وزارة العمل<br>دولة قطر</div>
-        </div>
-    </div>
+                <div>
+                    <h4 class="text-sm font-black text-[#F6E299] mb-4">خدماتنا السريعة</h4>
+                    <ul class="space-y-2.5 text-xs sm:text-sm text-white/80 font-semibold">
+                        <li><a href="hourly.html" class="hover:text-white transition-colors">← عمالة منزلية بالساعة</a></li>
+                        <li><a href="monthly.html" class="hover:text-white transition-colors">← عمالة منزلية بالشهر</a></li>
+                        <li><a href="recruitment.html" class="hover:text-white transition-colors">← استقدام عمالة منزلية</a></li>
+                    </ul>
+                </div>
 
-    <footer class="bg-[#8D1B3D] text-white pt-16 pb-8 px-[8%]">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 border-b border-white/10 pb-12 mb-8 text-right">
-            <div>
-                <h4 class="text-xl font-bold mb-3">جسور</h4>
-                <p class="text-[11px] opacity-70 mb-5">الشركة القطرية لحلول القوى البشرية</p>
-                <p class="text-[13px] opacity-80 leading-relaxed">نقدم أفضل خدمات العمالة المنزلية في قطر.</p>
+                <div>
+                    <h4 class="text-sm font-black text-[#F6E299] mb-4">معلومات التواصل</h4>
+                    <ul class="space-y-2.5 text-xs sm:text-sm text-white/80 font-semibold">
+                        <li>📍 الدوحة، دولة قطر</li>
+                        <li>✉️ info@jusourqtr.com</li>
+                        <li>🕒 متاحون على مدار الساعة 24/7</li>
+                    </ul>
+                </div>
             </div>
-            <div class="sm:text-center">
-                <h4 class="text-[16px] font-bold mb-6 border-r-4 border-white pr-4 inline-block">تواصل معنا</h4>
-                <ul class="text-[13px] opacity-70 space-y-3">
-                    <li>info@jusourqtr.com</li>
-                    <li>الدوحة، قطر</li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="text-[16px] font-bold mb-6 border-r-4 border-white pr-4 inline-block">روابط سريعة</h4>
-                <ul class="text-[13px] opacity-70 space-y-3">
-                    <li><a href="hourly.html">عمالة بالساعة</a></li>
-                    <li><a href="monthly.html">عمالة بالشهر</a></li>
-                    <li><a href="recruitment.html">استقدام عمالة</a></li>
-                </ul>
+
+            <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-white/55 font-semibold">
+                <p>© 2026 جسور (الشركة القطرية لحلول القوى البشرية) — جميع الحقوق محفوظة</p>
+                <p>Qatar Manpower Solutions Co. (Jusour)</p>
             </div>
         </div>
-        <p class="text-center text-[10px] opacity-50">© 2026 جسور - جميع الحقوق محفوظة</p>
     </footer>
 
-    <script>
-    // المرجع يُحفظ في المتصفح ويُستخدم في كل صفحات الموقع (نفس السلوك السابق).
-    const myRef = resolveRef();
+    <!-- Sticky Bottom Bar on Mobile Phones Only -->
+    <div class="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-stone-200 px-3 py-2.5 shadow-2xl">
+        <div class="grid grid-cols-3 gap-2 text-center">
+            <a href="hourly.html" class="bg-[#8D1B3D] text-white font-extrabold text-xs py-2.5 rounded-xl shadow-sm">🕒 بالساعة</a>
+            <a href="monthly.html" class="bg-stone-900 text-white font-extrabold text-xs py-2.5 rounded-xl shadow-sm">📅 بالشهر</a>
+            <a href="recruitment.html" class="bg-stone-100 text-stone-800 border border-stone-200 font-extrabold text-xs py-2.5 rounded-xl">👥 استقدام</a>
+        </div>
+    </div>
 
-    // تسجيل الدخول في لوحة تحكم الإدارة
-    if (window.trackAction) { trackAction(myRef, 'Home-Entrance'); }
+    <script>
+        // القائمة المتجاوبة للهاتف
+        (function () {
+            var btn = document.getElementById('mobileMenuBtn');
+            var menu = document.getElementById('mobileMenu');
+            var openIcon = document.getElementById('menuOpenIcon');
+            var closeIcon = document.getElementById('menuCloseIcon');
+            if (btn && menu) {
+                btn.addEventListener('click', function () {
+                    var isHidden = menu.classList.contains('hidden');
+                    menu.classList.toggle('hidden', !isHidden);
+                    if (openIcon && closeIcon) {
+                        openIcon.classList.toggle('hidden', isHidden);
+                        closeIcon.classList.toggle('hidden', !isHidden);
+                    }
+                });
+            }
+        })();
+
+        // المرجع يُحفظ في المتصفح ويُستخدم في كل صفحات الموقع
+        const myRef = resolveRef();
+
+        // تسجيل الدخول في لوحة تحكم الإدارة
+        if (window.trackAction) { trackAction(myRef, 'Home-Entrance'); }
     </script>
 </body>
 </html>
