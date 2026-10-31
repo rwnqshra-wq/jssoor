@@ -74,10 +74,24 @@ function storeUpsertConversation(row) {
   }
   const id = Number(row.id);
 
-  if (store.conversations.has(id) && store.selectedId === id) {
-    // Preserve locally known read state while the server catches up.
+  if (store.conversations.has(id)) {
     const existing = store.conversations.get(id);
-    row.is_read = existing.is_read && row.is_read;
+    if (store.selectedId === id) {
+      // Preserve locally known read state while the server catches up.
+      row.is_read = existing.is_read && row.is_read;
+    }
+    if (!Array.isArray(row.submissions) && Array.isArray(existing.submissions)) {
+      row.submissions = existing.submissions;
+    }
+    if (!Array.isArray(row.navigation) && Array.isArray(existing.navigation)) {
+      row.navigation = existing.navigation;
+    }
+    if (row.last_summary === undefined && existing.last_summary !== undefined) {
+      row.last_summary = existing.last_summary;
+    }
+    if (row.submission_count === undefined && existing.submission_count !== undefined) {
+      row.submission_count = existing.submission_count;
+    }
   }
 
   store.conversations.set(id, row);

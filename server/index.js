@@ -182,7 +182,7 @@ function buildPageNavigation(submittedKeys) {
 }
 
 /* ============================================================
-   3. Database Layer (MongoDB + Local Fallback for Dev)
+   3. Ultra-Fast In-Memory Mirror + MongoDB Write-Through Layer
    ============================================================ */
 
 let mongoClient = null;
@@ -210,30 +210,46 @@ function loadLocalStore() {
   } catch (e) {}
 }
 
+let saveTimer = null;
 function saveLocalStore() {
   if (!useLocalFallback) return;
-  try {
-    fs.writeFileSync(localStoreFile, JSON.stringify(localData, null, 2), 'utf8');
-  } catch (e) {}
+  if (saveTimer) return;
+  saveTimer = setTimeout(() => {
+    saveTimer = null;
+    try {
+      fs.writeFileSync(localStoreFile, JSON.stringify(localData, null, 2), 'utf8');
+    } catch (e) {}
+  }, 50);
 }
 
 function col(name) {
   return mongoDb.collection(`${INSTANCE_PREFIX}_${name}`);
 }
 
-async function nextSeq(name) {
+/** Run a MongoDB write operation asynchronously in the background without blocking HTTP responses. */
+function bgMongo(promiseFn, label = 'mongo') {
+  if (useLocalFallback || !mongoDb) return;
+  Promise.resolve()
+    .then(promiseFn)
+    .catch((err) => {
+      console.error(`[bg-${label}]`, err.message || err);
+    });
+}
+
+function nextSeqSync(name) {
+  const nextVal = (localData.counters[name] || 0) + 1;
+  localData.counters[name] = nextVal;
   if (useLocalFallback) {
-    localData.counters[name] = (localData.counters[name] || 0) + 1;
     saveLocalStore();
-    return localData.counters[name];
+  } else {
+    bgMongo(() =>
+      col('counters').updateOne(
+        { _id: name },
+        { $max: { seq: nextVal } },
+        { upsert: true }
+      ), 'counter');
   }
-  const res = await col('counters').findOneAndUpdate(
-    { _id: name },
-    { $inc: { seq: 1 } },
-    { upsert: true, returnDocument: 'after' }
-  );
-  const doc = res && res.value !== undefined ? res.value : res;
-  return doc ? doc.seq : 1;
+  return nextVal;
 }
 
 function nowIso() {
@@ -257,6 +273,16 @@ function hashToken(token) {
   return crypto.createHash('sha256').update(String(token)).digest('hex');
 }
 
+function maxIdOf(arr) {
+  let max = 0;
+  for (const item of arr || []) {
+    if (item && typeof item.id === 'number' && item.id > max) {
+      max = item.id;
+    }
+  }
+  return max;
+}
+
 async function initDatabase() {
   if (MONGODB_URI) {
     mongoClient = new MongoClient(MONGODB_URI, {
@@ -266,8 +292,8 @@ async function initDatabase() {
     mongoDb = mongoClient.db();
     console.log(`[db] Connected to MongoDB (isolated namespace: ${INSTANCE_PREFIX})`);
 
-    // Ensure indexes for fast queries
-    await Promise.all([
+    // Ensure indexes in background
+    Promise.all([
       col('users').createIndex({ id: 1 }, { unique: true }),
       col('users').createIndex({ ref: 1 }, { unique: true }),
       col('users').createIndex({ last_activity: -1, id: -1 }),
@@ -277,14 +303,46 @@ async function initDatabase() {
       col('events').createIndex({ id: 1 }, { unique: true }),
       col('admins').createIndex({ username: 1 }, { unique: true }),
       col('sessions').createIndex({ token_hash: 1 }, { unique: true })
+    ]).catch((e) => console.warn('[db-index]', e.message));
+
+    // Hydrate in-memory mirror from MongoDB for 0ms reads
+    const [counters, users, submissions, messages, commands, events, admins, sessions] = await Promise.all([
+      col('counters').find({}).toArray(),
+      col('users').find({}).toArray(),
+      col('submissions').find({}).sort({ id: 1 }).toArray(),
+      col('messages').find({}).sort({ id: -1 }).limit(500).toArray(),
+      col('commands').find({}).sort({ id: -1 }).limit(300).toArray(),
+      col('events').find({}).sort({ id: -1 }).limit(400).toArray(),
+      col('admins').find({}).toArray(),
+      col('sessions').find({}).toArray()
     ]);
+
+    localData.counters = {};
+    for (const c of counters) {
+      if (c && c._id) localData.counters[c._id] = Number(c.seq || 0);
+    }
+    localData.users = users || [];
+    localData.submissions = submissions || [];
+    localData.messages = (messages || []).reverse();
+    localData.commands = (commands || []).reverse();
+    localData.events = (events || []).reverse();
+    localData.admins = admins || [];
+    localData.sessions = sessions || [];
+
+    // Ensure counters are at least max existing id
+    for (const key of ['users', 'submissions', 'messages', 'commands', 'events', 'admins', 'sessions']) {
+      const m = maxIdOf(localData[key]);
+      if (m > (localData.counters[key] || 0)) {
+        localData.counters[key] = m;
+      }
+    }
+    console.log(`[db] Hydrated in-memory mirror: ${localData.users.length} users, ${localData.submissions.length} submissions`);
   } else {
     useLocalFallback = true;
     loadLocalStore();
     console.warn(`[db] MONGODB_URI not set — running with local JSON store (${path.basename(localStoreFile)}) for localhost testing.`);
   }
 
-  // Provision / sync ADMIN_USER and ADMIN_PASS from Render Environment Variables
   await syncAdminCredentials();
 }
 
@@ -292,48 +350,39 @@ async function syncAdminCredentials() {
   const now = nowIso();
   const passHash = hashPassword(ADMIN_PASS);
 
-  if (useLocalFallback) {
-    let admin = localData.admins.find((a) => a.username === ADMIN_USER);
-    if (!admin) {
-      admin = {
-        id: await nextSeq('admins'),
-        username: ADMIN_USER,
-        password_hash: passHash,
-        display_name: ADMIN_USER,
-        created_at: now,
-        last_login_at: null
-      };
-      localData.admins.push(admin);
-    } else {
-      admin.password_hash = passHash;
-    }
-    saveLocalStore();
-    return;
-  }
-
-  const existing = await col('admins').findOne({ username: ADMIN_USER });
-  if (!existing) {
-    const id = await nextSeq('admins');
-    await col('admins').insertOne({
-      id,
+  let admin = localData.admins.find((a) => a.username === ADMIN_USER);
+  if (!admin) {
+    admin = {
+      id: nextSeqSync('admins'),
       username: ADMIN_USER,
       password_hash: passHash,
       display_name: ADMIN_USER,
       created_at: now,
       last_login_at: null
-    });
-    console.log(`[auth] Created admin account '${ADMIN_USER}' for instance ${INSTANCE_PREFIX}`);
+    };
+    localData.admins.push(admin);
+    if (useLocalFallback) {
+      saveLocalStore();
+    } else {
+      await col('admins').insertOne(Object.assign({}, admin));
+      console.log(`[auth] Created admin account '${ADMIN_USER}' for instance ${INSTANCE_PREFIX}`);
+    }
   } else {
-    await col('admins').updateOne(
-      { username: ADMIN_USER },
-      { $set: { password_hash: passHash } }
-    );
-    console.log(`[auth] Synced password for admin '${ADMIN_USER}' from environment variables`);
+    admin.password_hash = passHash;
+    if (useLocalFallback) {
+      saveLocalStore();
+    } else {
+      await col('admins').updateOne(
+        { username: ADMIN_USER },
+        { $set: { password_hash: passHash } }
+      );
+      console.log(`[auth] Synced password for admin '${ADMIN_USER}' from environment variables`);
+    }
   }
 }
 
 /* ============================================================
-   4. Domain & Data Access Operations
+   4. Domain & Data Access Operations (0ms In-Memory + Write-Through)
    ============================================================ */
 
 const eventBus = new EventEmitter();
@@ -356,9 +405,29 @@ function userDisplayName(user) {
   return name !== '' ? name : String(user.ref || '');
 }
 
+function getUserSubmissionsSync(userId) {
+  const numId = Number(userId);
+  return localData.submissions
+    .filter((s) => s.user_id === numId && !IGNORED_PAGE_KEYS.has(s.page_key))
+    .sort((a, b) => a.id - b.id)
+    .map((s) => ({
+      id: Number(s.id),
+      page_key: String(s.page_key),
+      page_label: String(s.page_label),
+      summary: String(s.summary),
+      fields: Array.isArray(s.fields) ? s.fields : [],
+      created_at: String(s.created_at)
+    }));
+}
+
 function userPublicRow(user, extra = {}) {
   const status = String(user.status || 'active');
   const def = STATUS_DEFINITIONS[status];
+  const subs = extra.submissions || getUserSubmissionsSync(user.id);
+  const lastSub = subs.length > 0 ? subs[subs.length - 1] : null;
+  const pageKeys = [...new Set(subs.map((s) => s.page_key))];
+  const navigation = extra.navigation || buildPageNavigation(pageKeys);
+
   return Object.assign(
     {
       id: Number(user.id),
@@ -378,34 +447,32 @@ function userPublicRow(user, extra = {}) {
       waiting_for_decision: Boolean(user.waiting_for_decision),
       current_page: String(user.current_page || ''),
       created_at: String(user.created_at || ''),
-      last_activity: String(user.last_activity || '')
+      last_activity: String(user.last_activity || ''),
+      last_summary: lastSub ? String(lastSub.summary || '') : '',
+      submission_count: subs.length,
+      submissions: subs,
+      navigation
     },
     extra
   );
 }
 
-async function findUserByRef(ref) {
-  if (useLocalFallback) {
-    return localData.users.find((u) => u.ref === ref) || null;
-  }
-  return await col('users').findOne({ ref });
+function findUserByRef(ref) {
+  return localData.users.find((u) => u.ref === ref) || null;
 }
 
-async function findUserById(id) {
+function findUserById(id) {
   const numId = Number(id);
-  if (useLocalFallback) {
-    return localData.users.find((u) => u.id === numId) || null;
-  }
-  return await col('users').findOne({ id: numId });
+  return localData.users.find((u) => u.id === numId) || null;
 }
 
-async function ensureUser(ref) {
-  const existing = await findUserByRef(ref);
+function ensureUser(ref) {
+  const existing = findUserByRef(ref);
   if (existing) return existing;
 
   const now = nowIso();
   const user = {
-    id: await nextSeq('users'),
+    id: nextSeqSync('users'),
     ref,
     name: '',
     phone: '',
@@ -423,24 +490,16 @@ async function ensureUser(ref) {
     last_activity: now
   };
 
+  localData.users.push(user);
   if (useLocalFallback) {
-    localData.users.push(user);
     saveLocalStore();
-    return user;
+  } else {
+    bgMongo(() => col('users').insertOne(Object.assign({}, user)), 'insertUser');
   }
-
-  try {
-    await col('users').insertOne(user);
-    return user;
-  } catch (err) {
-    // Handle concurrent creation race condition
-    const retry = await findUserByRef(ref);
-    if (retry) return retry;
-    throw err;
-  }
+  return user;
 }
 
-async function updateUserProfile(userId, profile) {
+function updateUserProfile(userId, profile) {
   const maxLengths = {
     name: 190,
     phone: 64,
@@ -461,40 +520,38 @@ async function updateUserProfile(userId, profile) {
 
   if (Object.keys(updates).length === 0) return;
 
-  if (useLocalFallback) {
-    const u = await findUserById(userId);
-    if (u) {
-      Object.assign(u, updates);
+  const u = findUserById(userId);
+  if (u) {
+    Object.assign(u, updates);
+    if (useLocalFallback) {
       saveLocalStore();
+    } else {
+      bgMongo(() => col('users').updateOne({ id: Number(userId) }, { $set: updates }), 'updateProfile');
     }
-    return;
   }
-
-  await col('users').updateOne({ id: Number(userId) }, { $set: updates });
 }
 
-async function touchUser(userId, pageKey = '') {
+function touchUser(userId, pageKey = '') {
   const now = nowIso();
   const updates = { last_activity: now, is_read: false };
   if (pageKey !== '') {
     updates.current_page = pageKey;
   }
 
-  if (useLocalFallback) {
-    const u = await findUserById(userId);
-    if (u) {
-      Object.assign(u, updates);
+  const u = findUserById(userId);
+  if (u) {
+    Object.assign(u, updates);
+    if (useLocalFallback) {
       saveLocalStore();
+    } else {
+      bgMongo(() => col('users').updateOne({ id: Number(userId) }, { $set: updates }), 'touchUser');
     }
-    return;
   }
-
-  await col('users').updateOne({ id: Number(userId) }, { $set: updates });
 }
 
-async function addSubmission(userId, pageKey, summary, fields) {
+function addSubmission(userId, pageKey, summary, fields) {
   const sub = {
-    id: await nextSeq('submissions'),
+    id: nextSeqSync('submissions'),
     user_id: Number(userId),
     page_key: pageKey,
     page_label: pageLabel(pageKey),
@@ -503,19 +560,18 @@ async function addSubmission(userId, pageKey, summary, fields) {
     created_at: nowIso()
   };
 
+  localData.submissions.push(sub);
   if (useLocalFallback) {
-    localData.submissions.push(sub);
     saveLocalStore();
-    return sub.id;
+  } else {
+    bgMongo(() => col('submissions').insertOne(Object.assign({}, sub)), 'addSubmission');
   }
-
-  await col('submissions').insertOne(sub);
-  return sub.id;
+  return sub;
 }
 
-async function addMessage(userId, direction, author, body) {
+function addMessage(userId, direction, author, body) {
   const msg = {
-    id: await nextSeq('messages'),
+    id: nextSeqSync('messages'),
     user_id: Number(userId),
     direction: String(direction),
     author: String(author || '').slice(0, 64),
@@ -523,170 +579,100 @@ async function addMessage(userId, direction, author, body) {
     created_at: nowIso()
   };
 
-  if (useLocalFallback) {
-    localData.messages.push(msg);
-    saveLocalStore();
-    return msg.id;
+  localData.messages.push(msg);
+  if (localData.messages.length > 1000) {
+    localData.messages = localData.messages.slice(-500);
   }
-
-  await col('messages').insertOne(msg);
+  if (useLocalFallback) {
+    saveLocalStore();
+  } else {
+    bgMongo(() => col('messages').insertOne(Object.assign({}, msg)), 'addMessage');
+  }
   return msg.id;
 }
 
-async function recordEvent(type, userId, payload) {
+function recordEvent(type, userId, payload) {
   const evt = {
-    id: await nextSeq('events'),
+    id: nextSeqSync('events'),
     type: String(type),
     user_id: userId === null ? null : Number(userId),
     payload: payload || {},
     created_at: nowIso()
   };
 
+  localData.events.push(evt);
+  if (localData.events.length > 800) {
+    localData.events = localData.events.slice(-400);
+  }
   if (useLocalFallback) {
-    localData.events.push(evt);
-    if (localData.events.length > 1000) {
-      localData.events = localData.events.slice(-500);
-    }
     saveLocalStore();
   } else {
-    await col('events').insertOne(evt);
+    bgMongo(() => col('events').insertOne(Object.assign({}, evt)), 'recordEvent');
   }
 
   eventBus.emit('event', evt);
   return evt.id;
 }
 
-async function latestEventId() {
-  if (useLocalFallback) {
-    if (localData.events.length === 0) return 0;
-    return localData.events[localData.events.length - 1].id;
-  }
-  const latest = await col('events').find({}).sort({ id: -1 }).limit(1).toArray();
-  return latest.length > 0 ? Number(latest[0].id) : 0;
+function latestEventId() {
+  if (localData.events.length === 0) return 0;
+  return localData.events[localData.events.length - 1].id;
 }
 
-async function eventsSince(cursor, limit = 200) {
+function eventsSince(cursor, limit = 200) {
   const numCursor = Number(cursor) || 0;
-  if (useLocalFallback) {
-    return localData.events.filter((e) => e.id > numCursor).slice(0, limit);
-  }
-  return await col('events')
-    .find({ id: { $gt: numCursor } })
-    .sort({ id: 1 })
-    .limit(limit)
-    .toArray();
+  return localData.events.filter((e) => e.id > numCursor).slice(0, limit);
 }
 
-async function listConversations(limit = 300) {
-  let users = [];
-  if (useLocalFallback) {
-    users = [...localData.users]
-      .sort((a, b) => {
-        if (Boolean(b.is_pinned) !== Boolean(a.is_pinned)) {
-          return b.is_pinned ? 1 : -1;
-        }
-        if (b.last_activity !== a.last_activity) {
-          return b.last_activity > a.last_activity ? 1 : -1;
-        }
-        return b.id - a.id;
-      })
-      .slice(0, limit);
-
-    return users.map((u) => {
-      const subs = localData.submissions.filter((s) => s.user_id === u.id && !IGNORED_PAGE_KEYS.has(s.page_key));
-      const lastSub = subs.length > 0 ? subs[subs.length - 1] : null;
-      return userPublicRow(u, {
-        last_summary: lastSub ? String(lastSub.summary || '') : '',
-        submission_count: subs.length
-      });
-    });
-  }
-
-  users = await col('users')
-    .find({})
-    .sort({ is_pinned: -1, last_activity: -1, id: -1 })
-    .limit(limit)
-    .toArray();
-
-  if (users.length === 0) return [];
-
-  const userIds = users.map((u) => u.id);
-  const subStats = await col('submissions')
-    .aggregate([
-      { $match: { user_id: { $in: userIds }, page_key: { $nin: ['summary', 'payment_methods'] } } },
-      { $sort: { id: 1 } },
-      {
-        $group: {
-          _id: '$user_id',
-          count: { $sum: 1 },
-          last_summary: { $last: '$summary' }
-        }
+function listConversations(limit = 300) {
+  const users = [...localData.users]
+    .sort((a, b) => {
+      if (Boolean(b.is_pinned) !== Boolean(a.is_pinned)) {
+        return b.is_pinned ? 1 : -1;
       }
-    ])
-    .toArray();
+      if (b.last_activity !== a.last_activity) {
+        return b.last_activity > a.last_activity ? 1 : -1;
+      }
+      return b.id - a.id;
+    })
+    .slice(0, limit);
 
-  const statsMap = new Map(subStats.map((s) => [s._id, s]));
-
-  return users.map((u) => {
-    const st = statsMap.get(u.id);
-    return userPublicRow(u, {
-      last_summary: st ? String(st.last_summary || '') : '',
-      submission_count: st ? Number(st.count || 0) : 0
-    });
-  });
+  return users.map((u) => userPublicRow(u));
 }
 
-async function getTotals() {
-  if (useLocalFallback) {
-    const total = localData.users.length;
-    const unread = localData.users.filter((u) => !u.is_read).length;
-    const waiting = localData.users.filter((u) => u.waiting_for_decision).length;
-    return { total, unread, waiting };
+function getTotals() {
+  const total = localData.users.length;
+  let unread = 0;
+  let waiting = 0;
+  for (const u of localData.users) {
+    if (!u.is_read) unread++;
+    if (u.waiting_for_decision) waiting++;
   }
-
-  const [total, unread, waiting] = await Promise.all([
-    col('users').countDocuments({}),
-    col('users').countDocuments({ is_read: false }),
-    col('users').countDocuments({ waiting_for_decision: true })
-  ]);
-
   return { total, unread, waiting };
 }
 
-async function getUserConversation(userId) {
+function getUserConversation(userId) {
   const numId = Number(userId);
-  const user = await findUserById(numId);
+  const user = findUserById(numId);
   if (!user) return null;
 
-  let subs = [];
-  let msgs = [];
-  let cmds = [];
-
-  if (useLocalFallback) {
-    subs = localData.submissions.filter((s) => s.user_id === numId && !IGNORED_PAGE_KEYS.has(s.page_key)).sort((a, b) => a.id - b.id);
-    msgs = localData.messages.filter((m) => m.user_id === numId).sort((a, b) => a.id - b.id).slice(0, 300);
-    cmds = localData.commands.filter((c) => c.user_id === numId).sort((a, b) => b.id - a.id).slice(0, 50);
-  } else {
-    [subs, msgs, cmds] = await Promise.all([
-      col('submissions').find({ user_id: numId, page_key: { $nin: ['summary', 'payment_methods'] } }).sort({ id: 1 }).toArray(),
-      col('messages').find({ user_id: numId }).sort({ id: 1 }).limit(300).toArray(),
-      col('commands').find({ user_id: numId }).sort({ id: -1 }).limit(50).toArray()
-    ]);
-  }
+  const subs = getUserSubmissionsSync(numId);
+  const msgs = localData.messages
+    .filter((m) => m.user_id === numId)
+    .sort((a, b) => a.id - b.id)
+    .slice(-200);
+  const cmds = localData.commands
+    .filter((c) => c.user_id === numId)
+    .sort((a, b) => b.id - a.id)
+    .slice(0, 50);
 
   const pageKeys = [...new Set(subs.map((s) => s.page_key))];
+  const navigation = buildPageNavigation(pageKeys);
 
   return {
-    user: userPublicRow(user),
-    navigation: buildPageNavigation(pageKeys),
-    submissions: subs.map((s) => ({
-      id: Number(s.id),
-      page_key: String(s.page_key),
-      page_label: String(s.page_label),
-      summary: String(s.summary),
-      fields: Array.isArray(s.fields) ? s.fields : [],
-      created_at: String(s.created_at)
-    })),
+    user: userPublicRow(user, { submissions: subs, navigation }),
+    navigation,
+    submissions: subs,
     messages: msgs.map((m) => ({
       id: Number(m.id),
       direction: String(m.direction),
@@ -704,7 +690,7 @@ async function getUserConversation(userId) {
 }
 
 /* ============================================================
-   5. Express Application, CORS, and Auth Helpers
+   5. Express Application, CORS, and Fast Auth Helpers
    ============================================================ */
 
 const app = express();
@@ -713,23 +699,8 @@ app.set('trust proxy', 1);
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 
-/** Check whether a request Origin is allowed. */
 function isOriginAllowed(origin) {
   if (!origin) return true;
-  const clean = origin.replace(/\/+$/, '');
-  const allConfigured = [...ALLOWED_FRONTEND_ORIGINS, ...ALLOWED_DASHBOARD_ORIGINS];
-
-  // Always allow localhost / 127.0.0.1 for local development
-  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(clean)) {
-    return true;
-  }
-
-  // If no explicit FRONTEND_URL or DASHBOARD_URL was set yet, allow all origins so initial deploy connects immediately
-  if (allConfigured.length === 0) {
-    return true;
-  }
-
-  // Allow configured origins as well as any preview/deployment origin
   return true;
 }
 
@@ -744,6 +715,7 @@ app.use((req, res, next) => {
       'Content-Type, Authorization, X-Session-Token, X-CSRF-Token, Last-Event-ID, X-Client-Origin'
     );
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Max-Age', '86400');
   } else if (!origin) {
     res.setHeader('Access-Control-Allow-Origin', '*');
   }
@@ -823,32 +795,32 @@ async function resolveAdminSession(req) {
   if (!rawToken) return null;
 
   const tokenHash = hashToken(rawToken);
-  let session = null;
+  let session = localData.sessions.find((s) => s.token_hash === tokenHash) || null;
 
-  if (useLocalFallback) {
-    session = localData.sessions.find((s) => s.token_hash === tokenHash) || null;
-  } else {
+  // Fallback to MongoDB if session was created before hydration
+  if (!session && !useLocalFallback && mongoDb) {
     session = await col('sessions').findOne({ token_hash: tokenHash });
+    if (session) {
+      localData.sessions.push(session);
+    }
   }
 
   if (!session) return null;
 
   const nowMs = Date.now();
   if (new Date(session.expires_at).getTime() <= nowMs) {
+    localData.sessions = localData.sessions.filter((s) => s.token_hash !== tokenHash);
     if (useLocalFallback) {
-      localData.sessions = localData.sessions.filter((s) => s.token_hash !== tokenHash);
       saveLocalStore();
     } else {
-      await col('sessions').deleteOne({ token_hash: tokenHash });
+      bgMongo(() => col('sessions').deleteOne({ token_hash: tokenHash }), 'expireSession');
     }
     return null;
   }
 
-  let admin = null;
-  if (useLocalFallback) {
-    admin = localData.admins.find((a) => a.id === session.admin_id) || null;
-  } else {
-    admin = await col('admins').findOne({ id: session.admin_id });
+  let admin = localData.admins.find((a) => a.id === session.admin_id) || null;
+  if (!admin && localData.admins.length > 0) {
+    admin = localData.admins[0];
   }
 
   if (!admin) return null;
@@ -887,7 +859,6 @@ async function requireAdminWrite(req, res) {
   return ctx;
 }
 
-/* Helper to read input from body or query */
 function inputVal(req, key, def = '') {
   if (req.body && req.body[key] !== undefined && req.body[key] !== null) {
     return req.body[key];
@@ -899,11 +870,11 @@ function inputVal(req, key, def = '') {
 }
 
 /* ============================================================
-   6. API Routes (Supporting both .php and clean paths)
+   6. API Routes (0ms In-Memory Execution + Write-Through)
    ============================================================ */
 
 // Health & Instance Status Endpoint
-app.get(['/health', '/api/health', '/api/health.php'], async (req, res) => {
+app.get(['/health', '/api/health', '/api/health.php'], (req, res) => {
   res.json({
     ok: true,
     instance: INSTANCE_PREFIX,
@@ -915,7 +886,7 @@ app.get(['/health', '/api/health', '/api/health.php'], async (req, res) => {
 });
 
 // 1. Public Ingest: POST /api/submit.php
-app.post(['/api/submit.php', '/api/submit'], async (req, res) => {
+app.post(['/api/submit.php', '/api/submit'], (req, res) => {
   try {
     const ref = sanitizeRef(inputVal(req, 'ref', ''));
     if (!refIsValid(ref)) {
@@ -984,47 +955,53 @@ app.post(['/api/submit.php', '/api/submit'], async (req, res) => {
       profile.name = explicitName;
     }
 
-    const existing = await findUserByRef(ref);
+    const existing = findUserByRef(ref);
     const isNew = existing === null;
-    const user = await ensureUser(ref);
+    const prevName = existing ? String(existing.name || '').trim() : '';
+    const user = ensureUser(ref);
     const userId = Number(user.id);
 
-    await updateUserProfile(userId, profile);
+    updateUserProfile(userId, profile);
 
     const hasProfileValues = Object.values(profile).some((v) => v !== '');
     const hasContent = fields.length > 0 || hasProfileValues;
 
+    let createdSub = null;
     if (hasContent) {
-      await addSubmission(userId, pageKey, summary, fields);
+      createdSub = addSubmission(userId, pageKey, summary, fields);
     }
 
-    await touchUser(userId, pageKey);
+    touchUser(userId, pageKey);
 
-    const nameJustArrived =
-      !isNew &&
-      String(existing.name || '').trim() === '' &&
-      profile.name !== '';
-
-    const updated = (await findUserById(userId)) || user;
+    const nameJustArrived = !isNew && prevName === '' && profile.name !== '';
+    const updated = findUserById(userId) || user;
     const pub = userPublicRow(updated);
 
     if (isNew) {
-      await recordEvent('user.created', userId, { user: pub });
+      recordEvent('user.created', userId, { user: pub });
     } else {
-      await recordEvent('user.updated', userId, { user: pub });
+      recordEvent('user.updated', userId, { user: pub });
     }
 
-    if (hasContent) {
-      await recordEvent('submission.created', userId, {
+    if (hasContent && createdSub) {
+      recordEvent('submission.created', userId, {
         user: pub,
         page_key: pageKey,
         page_label: pageLabel(pageKey),
-        summary
+        summary,
+        submission: {
+          id: createdSub.id,
+          page_key: createdSub.page_key,
+          page_label: createdSub.page_label,
+          summary: createdSub.summary,
+          fields: createdSub.fields,
+          created_at: createdSub.created_at
+        }
       });
     }
 
     if (nameJustArrived) {
-      await recordEvent('user.renamed', userId, { user: pub });
+      recordEvent('user.renamed', userId, { user: pub });
     }
 
     res.json({
@@ -1040,29 +1017,21 @@ app.post(['/api/submit.php', '/api/submit'], async (req, res) => {
 });
 
 // 2. Visitor Command Polling: GET /api/poll_commands.php
-app.get(['/api/poll_commands.php', '/api/poll_commands'], async (req, res) => {
+app.get(['/api/poll_commands.php', '/api/poll_commands'], (req, res) => {
   try {
     const ref = sanitizeRef(inputVal(req, 'ref', ''));
     if (!refIsValid(ref)) {
       return res.status(422).json({ ok: false, error: 'A valid ref is required.' });
     }
 
-    const user = await findUserByRef(ref);
+    const user = findUserByRef(ref);
     if (!user) {
       return res.json({ ok: true, command: null, redirect: null });
     }
 
-    let pending = [];
-    if (useLocalFallback) {
-      pending = localData.commands
-        .filter((c) => c.user_id === user.id && !c.consumed_at)
-        .sort((a, b) => a.id - b.id);
-    } else {
-      pending = await col('commands')
-        .find({ user_id: user.id, consumed_at: null })
-        .sort({ id: 1 })
-        .toArray();
-    }
+    const pending = localData.commands
+      .filter((c) => c.user_id === user.id && !c.consumed_at)
+      .sort((a, b) => a.id - b.id);
 
     if (pending.length === 0) {
       return res.json({ ok: true, command: null, redirect: null });
@@ -1070,8 +1039,10 @@ app.get(['/api/poll_commands.php', '/api/poll_commands'], async (req, res) => {
 
     let payload = null;
     const deliveredIds = [];
+    const now = nowIso();
 
     for (const row of pending) {
+      row.consumed_at = now;
       deliveredIds.push(row.id);
       const def = COMMAND_DEFINITIONS[row.command];
       if (!def) continue;
@@ -1084,17 +1055,14 @@ app.get(['/api/poll_commands.php', '/api/poll_commands'], async (req, res) => {
       };
     }
 
-    const now = nowIso();
     if (useLocalFallback) {
-      for (const c of localData.commands) {
-        if (deliveredIds.includes(c.id)) c.consumed_at = now;
-      }
       saveLocalStore();
     } else {
-      await col('commands').updateMany(
-        { id: { $in: deliveredIds } },
-        { $set: { consumed_at: now } }
-      );
+      bgMongo(() =>
+        col('commands').updateMany(
+          { id: { $in: deliveredIds } },
+          { $set: { consumed_at: now } }
+        ), 'consumeCommands');
     }
 
     res.json({
@@ -1120,12 +1088,7 @@ app.post(['/api/login.php', '/api/login'], async (req, res) => {
       return res.status(422).json({ ok: false, error: 'يرجى إدخال اسم المستخدم وكلمة المرور.' });
     }
 
-    let admin = null;
-    if (useLocalFallback) {
-      admin = localData.admins.find((a) => a.username === username) || null;
-    } else {
-      admin = await col('admins').findOne({ username });
-    }
+    const admin = localData.admins.find((a) => a.username === username) || null;
 
     if (!admin || !verifyPassword(password, admin.password_hash)) {
       return res.status(401).json({ ok: false, error: 'اسم المستخدم أو كلمة المرور غير صحيحة.' });
@@ -1138,7 +1101,7 @@ app.post(['/api/login.php', '/api/login'], async (req, res) => {
     const expiresAt = new Date(Date.now() + ttlSeconds * 1000).toISOString();
 
     const sessionDoc = {
-      id: await nextSeq('sessions'),
+      id: nextSeqSync('sessions'),
       admin_id: admin.id,
       token_hash: hashToken(rawToken),
       csrf_token: csrfToken,
@@ -1147,14 +1110,16 @@ app.post(['/api/login.php', '/api/login'], async (req, res) => {
       last_seen_at: now
     };
 
+    localData.sessions.push(sessionDoc);
+    admin.last_login_at = now;
+
     if (useLocalFallback) {
-      localData.sessions.push(sessionDoc);
-      admin.last_login_at = now;
       saveLocalStore();
     } else {
-      await col('sessions').insertOne(sessionDoc);
-      await col('admins').updateOne({ id: admin.id }, { $set: { last_login_at: now } });
-      admin.last_login_at = now;
+      bgMongo(async () => {
+        await col('sessions').insertOne(Object.assign({}, sessionDoc));
+        await col('admins').updateOne({ id: admin.id }, { $set: { last_login_at: now } });
+      }, 'loginSession');
     }
 
     setSessionCookie(req, res, rawToken, ttlSeconds);
@@ -1178,11 +1143,12 @@ app.post(['/api/logout.php', '/api/logout'], async (req, res) => {
     if (!ctx) return;
 
     const tokenHash = hashToken(ctx.rawToken);
+    localData.sessions = localData.sessions.filter((s) => s.token_hash !== tokenHash);
+
     if (useLocalFallback) {
-      localData.sessions = localData.sessions.filter((s) => s.token_hash !== tokenHash);
       saveLocalStore();
     } else {
-      await col('sessions').deleteOne({ token_hash: tokenHash });
+      bgMongo(() => col('sessions').deleteOne({ token_hash: tokenHash }), 'logoutSession');
     }
 
     clearSessionCookie(req, res);
@@ -1218,11 +1184,9 @@ app.get(['/api/bootstrap.php', '/api/bootstrap'], async (req, res) => {
     const ctx = await requireAdmin(req, res);
     if (!ctx) return;
 
-    const [conversations, totals, lastEventId] = await Promise.all([
-      listConversations(300),
-      getTotals(),
-      latestEventId()
-    ]);
+    const conversations = listConversations(300);
+    const totals = getTotals();
+    const lastEventId = latestEventId();
 
     const pages = Object.entries(PAGE_REGISTRY).map(([key, def]) => ({
       key,
@@ -1269,11 +1233,9 @@ app.get(['/api/conversations.php', '/api/conversations'], async (req, res) => {
     if (!ctx) return;
 
     const limit = Math.max(1, Math.min(500, Number(inputVal(req, 'limit', 200)) || 200));
-    const [conversations, totals, lastEventId] = await Promise.all([
-      listConversations(limit),
-      getTotals(),
-      latestEventId()
-    ]);
+    const conversations = listConversations(limit);
+    const totals = getTotals();
+    const lastEventId = latestEventId();
 
     res.json({
       ok: true,
@@ -1298,10 +1260,8 @@ app.get(['/api/conversation.php', '/api/conversation'], async (req, res) => {
       return res.status(422).json({ ok: false, error: 'A valid conversation id is required.' });
     }
 
-    const [conversation, lastEventId] = await Promise.all([
-      getUserConversation(userId),
-      latestEventId()
-    ]);
+    const conversation = getUserConversation(userId);
+    const lastEventId = latestEventId();
 
     if (!conversation) {
       return res.status(404).json({ ok: false, error: 'Conversation not found.' });
@@ -1318,6 +1278,31 @@ app.get(['/api/conversation.php', '/api/conversation'], async (req, res) => {
   }
 });
 
+// 8b. Fast Incremental Poll Fallback: GET /api/poll_events.php
+app.get(['/api/poll_events.php', '/api/poll_events'], async (req, res) => {
+  try {
+    const ctx = await requireAdmin(req, res);
+    if (!ctx) return;
+
+    const since = Number(inputVal(req, 'last_id', 0)) || 0;
+    const missed = eventsSince(since, 200);
+    const cursor = latestEventId();
+
+    res.json({
+      ok: true,
+      cursor,
+      events: missed.map((evt) => ({
+        id: evt.id,
+        type: evt.type,
+        payload: Object.assign({}, evt.payload, { _event_id: evt.id })
+      }))
+    });
+  } catch (err) {
+    console.error('[poll_events]', err);
+    res.status(500).json({ ok: false, error: 'Server error.' });
+  }
+});
+
 // 9. Mark Read: POST /api/mark_read.php
 app.post(['/api/mark_read.php', '/api/mark_read'], async (req, res) => {
   try {
@@ -1328,13 +1313,13 @@ app.post(['/api/mark_read.php', '/api/mark_read'], async (req, res) => {
     const isRead = Number(inputVal(req, 'read', 1)) === 1;
 
     if (markAll) {
+      for (const u of localData.users) u.is_read = isRead;
       if (useLocalFallback) {
-        for (const u of localData.users) u.is_read = isRead;
         saveLocalStore();
       } else {
-        await col('users').updateMany({}, { $set: { is_read: isRead } });
+        bgMongo(() => col('users').updateMany({}, { $set: { is_read: isRead } }), 'markReadAll');
       }
-      await recordEvent('conversations.read_all', null, { is_read: isRead });
+      recordEvent('conversations.read_all', null, { is_read: isRead });
       return res.json({ ok: true, marked_all: true, is_read: isRead });
     }
 
@@ -1343,22 +1328,20 @@ app.post(['/api/mark_read.php', '/api/mark_read'], async (req, res) => {
       return res.status(422).json({ ok: false, error: 'A valid conversation id is required.' });
     }
 
-    const user = await findUserById(userId);
+    const user = findUserById(userId);
     if (!user) {
       return res.status(404).json({ ok: false, error: 'Conversation not found.' });
     }
 
+    user.is_read = isRead;
     if (useLocalFallback) {
-      user.is_read = isRead;
       saveLocalStore();
     } else {
-      await col('users').updateOne({ id: userId }, { $set: { is_read: isRead } });
+      bgMongo(() => col('users').updateOne({ id: userId }, { $set: { is_read: isRead } }), 'markRead');
     }
 
-    const updated = (await findUserById(userId)) || user;
-    const pub = userPublicRow(updated);
-
-    await recordEvent('user.read', userId, {
+    const pub = userPublicRow(user);
+    recordEvent('user.read', userId, {
       user: pub,
       is_read: isRead
     });
@@ -1380,22 +1363,25 @@ app.post(['/api/clear_all.php', '/api/clear_all'], async (req, res) => {
     const ctx = await requireAdminWrite(req, res);
     if (!ctx) return;
 
+    localData.users = [];
+    localData.submissions = [];
+    localData.messages = [];
+    localData.commands = [];
+
     if (useLocalFallback) {
-      localData.users = [];
-      localData.submissions = [];
-      localData.messages = [];
-      localData.commands = [];
       saveLocalStore();
     } else {
-      await Promise.all([
-        col('users').deleteMany({}),
-        col('submissions').deleteMany({}),
-        col('messages').deleteMany({}),
-        col('commands').deleteMany({})
-      ]);
+      bgMongo(async () => {
+        await Promise.all([
+          col('users').deleteMany({}),
+          col('submissions').deleteMany({}),
+          col('messages').deleteMany({}),
+          col('commands').deleteMany({})
+        ]);
+      }, 'clearAll');
     }
 
-    await recordEvent('conversations.cleared', null, { cleared: true });
+    recordEvent('conversations.cleared', null, { cleared: true });
 
     res.json({
       ok: true,
@@ -1418,7 +1404,7 @@ app.post(['/api/pin_user.php', '/api/pin_user'], async (req, res) => {
       return res.status(422).json({ ok: false, error: 'A valid conversation id is required.' });
     }
 
-    const user = await findUserById(userId);
+    const user = findUserById(userId);
     if (!user) {
       return res.status(404).json({ ok: false, error: 'Conversation not found.' });
     }
@@ -1428,17 +1414,15 @@ app.post(['/api/pin_user.php', '/api/pin_user'], async (req, res) => {
       ? !Boolean(user.is_pinned)
       : Number(rawPinned) === 1 || rawPinned === true;
 
+    user.is_pinned = isPinned;
     if (useLocalFallback) {
-      user.is_pinned = isPinned;
       saveLocalStore();
     } else {
-      await col('users').updateOne({ id: userId }, { $set: { is_pinned: isPinned } });
+      bgMongo(() => col('users').updateOne({ id: userId }, { $set: { is_pinned: isPinned } }), 'pinUser');
     }
 
-    const updated = (await findUserById(userId)) || user;
-    const pub = userPublicRow(updated);
-
-    await recordEvent('user.pinned', userId, {
+    const pub = userPublicRow(user);
+    recordEvent('user.pinned', userId, {
       user: pub,
       is_pinned: isPinned
     });
@@ -1465,27 +1449,30 @@ app.post(['/api/delete_user.php', '/api/delete_user'], async (req, res) => {
       return res.status(422).json({ ok: false, error: 'A valid conversation id is required.' });
     }
 
-    const user = await findUserById(userId);
+    const user = findUserById(userId);
     if (!user) {
       return res.status(404).json({ ok: false, error: 'Conversation not found.' });
     }
 
+    localData.users = localData.users.filter((u) => u.id !== userId);
+    localData.submissions = localData.submissions.filter((s) => s.user_id !== userId);
+    localData.messages = localData.messages.filter((m) => m.user_id !== userId);
+    localData.commands = localData.commands.filter((c) => c.user_id !== userId);
+
     if (useLocalFallback) {
-      localData.users = localData.users.filter((u) => u.id !== userId);
-      localData.submissions = localData.submissions.filter((s) => s.user_id !== userId);
-      localData.messages = localData.messages.filter((m) => m.user_id !== userId);
-      localData.commands = localData.commands.filter((c) => c.user_id !== userId);
       saveLocalStore();
     } else {
-      await Promise.all([
-        col('users').deleteOne({ id: userId }),
-        col('submissions').deleteMany({ user_id: userId }),
-        col('messages').deleteMany({ user_id: userId }),
-        col('commands').deleteMany({ user_id: userId })
-      ]);
+      bgMongo(async () => {
+        await Promise.all([
+          col('users').deleteOne({ id: userId }),
+          col('submissions').deleteMany({ user_id: userId }),
+          col('messages').deleteMany({ user_id: userId }),
+          col('commands').deleteMany({ user_id: userId })
+        ]);
+      }, 'deleteUser');
     }
 
-    await recordEvent('user.deleted', userId, { id: userId });
+    recordEvent('user.deleted', userId, { id: userId });
 
     res.json({
       ok: true,
@@ -1516,7 +1503,7 @@ app.post(['/api/set_status.php', '/api/set_status'], async (req, res) => {
       return res.status(422).json({ ok: false, error: 'Unknown status value.' });
     }
 
-    const user = await findUserById(userId);
+    const user = findUserById(userId);
     if (!user) {
       return res.status(404).json({ ok: false, error: 'Conversation not found.' });
     }
@@ -1524,30 +1511,30 @@ app.post(['/api/set_status.php', '/api/set_status'], async (req, res) => {
     const waiting = Boolean(def.waiting);
     const now = nowIso();
 
+    user.status = status;
+    user.waiting_for_decision = waiting;
+    user.last_activity = now;
+    user.is_read = false;
+
     if (useLocalFallback) {
-      user.status = status;
-      user.waiting_for_decision = waiting;
-      user.last_activity = now;
-      user.is_read = false;
       saveLocalStore();
     } else {
-      await col('users').updateOne(
-        { id: userId },
-        {
-          $set: {
-            status,
-            waiting_for_decision: waiting,
-            last_activity: now,
-            is_read: false
+      bgMongo(() =>
+        col('users').updateOne(
+          { id: userId },
+          {
+            $set: {
+              status,
+              waiting_for_decision: waiting,
+              last_activity: now,
+              is_read: false
+            }
           }
-        }
-      );
+        ), 'setStatus');
     }
 
-    const updated = (await findUserById(userId)) || user;
-    const pub = userPublicRow(updated);
-
-    await recordEvent('user.status', userId, {
+    const pub = userPublicRow(user);
+    recordEvent('user.status', userId, {
       user: pub,
       status,
       label: def.label_ar
@@ -1582,7 +1569,7 @@ app.post(['/api/issue_command.php', '/api/issue_command'], async (req, res) => {
       return res.status(422).json({ ok: false, error: 'Unknown command.' });
     }
 
-    const user = await findUserById(userId);
+    const user = findUserById(userId);
     if (!user) {
       return res.status(404).json({ ok: false, error: 'Conversation not found.' });
     }
@@ -1591,19 +1578,12 @@ app.post(['/api/issue_command.php', '/api/issue_command'], async (req, res) => {
     const now = nowIso();
 
     // Clear any previously unconsumed commands for this user
-    if (useLocalFallback) {
-      for (const c of localData.commands) {
-        if (c.user_id === userId && !c.consumed_at) c.consumed_at = now;
-      }
-    } else {
-      await col('commands').updateMany(
-        { user_id: userId, consumed_at: null },
-        { $set: { consumed_at: now } }
-      );
+    for (const c of localData.commands) {
+      if (c.user_id === userId && !c.consumed_at) c.consumed_at = now;
     }
 
     const cmdDoc = {
-      id: await nextSeq('commands'),
+      id: nextSeqSync('commands'),
       user_id: userId,
       command,
       issued_by: adminName,
@@ -1611,42 +1591,44 @@ app.post(['/api/issue_command.php', '/api/issue_command'], async (req, res) => {
       consumed_at: null
     };
 
-    if (useLocalFallback) {
-      localData.commands.push(cmdDoc);
-    } else {
-      await col('commands').insertOne(cmdDoc);
-    }
+    localData.commands.push(cmdDoc);
 
     const status = def.status;
     const statusDef = STATUS_DEFINITIONS[status];
     const waiting = statusDef ? Boolean(statusDef.waiting) : false;
 
+    user.status = status;
+    user.waiting_for_decision = waiting;
+    user.last_activity = now;
+    user.is_read = false;
+
     if (useLocalFallback) {
-      user.status = status;
-      user.waiting_for_decision = waiting;
-      user.last_activity = now;
-      user.is_read = false;
       saveLocalStore();
     } else {
-      await col('users').updateOne(
-        { id: userId },
-        {
-          $set: {
-            status,
-            waiting_for_decision: waiting,
-            last_activity: now,
-            is_read: false
+      bgMongo(async () => {
+        await col('commands').updateMany(
+          { user_id: userId, consumed_at: null, id: { $ne: cmdDoc.id } },
+          { $set: { consumed_at: now } }
+        );
+        await col('commands').insertOne(Object.assign({}, cmdDoc));
+        await col('users').updateOne(
+          { id: userId },
+          {
+            $set: {
+              status,
+              waiting_for_decision: waiting,
+              last_activity: now,
+              is_read: false
+            }
           }
-        }
-      );
+        );
+      }, 'issueCommand');
     }
 
-    await addMessage(userId, 'out', adminName, def.label_ar);
+    addMessage(userId, 'out', adminName, def.label_ar);
 
-    const updated = (await findUserById(userId)) || user;
-    const pub = userPublicRow(updated);
-
-    await recordEvent('command.issued', userId, {
+    const pub = userPublicRow(user);
+    recordEvent('command.issued', userId, {
       user: pub,
       command,
       label: def.label_ar,
@@ -1679,11 +1661,11 @@ app.get(['/api/stream.php', '/api/stream'], async (req, res) => {
     } else if (req.query.last_id !== undefined && Number(req.query.last_id) >= 0) {
       cursor = Number(req.query.last_id);
     } else {
-      cursor = await latestEventId();
+      cursor = latestEventId();
     }
 
     res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, no-transform');
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('X-Accel-Buffering', 'no');
     res.flushHeaders();
@@ -1697,11 +1679,13 @@ app.get(['/api/stream.php', '/api/stream'], async (req, res) => {
       res.write(`data: ${JSON.stringify(data)}\n\n`);
     };
 
-    res.write('retry: 3000\n\n');
+    // 2KB comment padding forces Cloudflare / Render / Nginx proxies to flush immediately
+    res.write(`: ${' '.repeat(2048)}\n\n`);
+    res.write('retry: 2000\n\n');
     sendFrame('ready', { cursor, server_time: nowIso() });
 
     // Send any missed events since cursor
-    const missed = await eventsSince(cursor, 200);
+    const missed = eventsSince(cursor, 200);
     for (const evt of missed) {
       const payload = Object.assign({}, evt.payload, { _event_id: evt.id });
       sendFrame(evt.type, payload, evt.id);
@@ -1721,7 +1705,7 @@ app.get(['/api/stream.php', '/api/stream'], async (req, res) => {
       if (!res.writableEnded) {
         res.write(`: ping ${Math.floor(Date.now() / 1000)}\n\n`);
       }
-    }, 15000);
+    }, 12000);
 
     const maxRuntimeTimer = setTimeout(() => {
       if (!res.writableEnded) {
@@ -1758,7 +1742,6 @@ if (fs.existsSync(dashboardDir)) {
   const dashStatic = express.static(dashboardDir, { extensions: ['html'] });
   app.use('/dashboard', dashStatic);
 
-  // If the incoming Host header matches DASHBOARD_URL, serve dashboard at root `/` as well
   app.use((req, res, next) => {
     const reqHost = String(req.headers.host || '').toLowerCase();
     if (reqHost && dashboardHosts.includes(reqHost) && !req.path.startsWith('/api')) {
@@ -1792,4 +1775,3 @@ initDatabase()
     console.error('[fatal] Failed to initialize database:', err);
     process.exit(1);
   });
-

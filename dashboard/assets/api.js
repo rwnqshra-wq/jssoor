@@ -212,6 +212,11 @@ const api = {
     return apiRequest('conversation.php', { query: { id: id } });
   },
 
+  /** Fast incremental event poll fallback. */
+  pollEvents: function (lastEventId) {
+    return apiRequest('poll_events.php', { query: { last_id: lastEventId || 0 } });
+  },
+
   /** Mark one conversation read, or all of them. */
   markRead: function (id, isRead) {
     const body = { read: isRead === false ? 0 : 1 };
