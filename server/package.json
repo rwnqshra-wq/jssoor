@@ -1,0 +1,19 @@
+{
+  "name": "jusour-render-server",
+  "version": "1.0.0",
+  "description": "Jusour Backend API Server (Node.js + MongoDB) for Render",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongodb": "^6.8.0"
+  }
+}
+

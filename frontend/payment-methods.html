@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طرق الدفع المتاحة | جسور</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #ffffff; }
+        .info-card { border: 1px solid #f0f0f0; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); background: #fff; }
+        .label-gray { color: #888; font-size: 14px; }
+        .val-black { color: #1a1a1a; font-weight: 700; font-size: 15px; }
+    </style>
+</head>
+<body class="text-[#1a1a1a]">
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-gray-100 h-[65px] flex items-center px-[6%] justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <div class="bg-[#8D1B3D] w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-lg">ج</div>
+            <div class="text-right leading-none">
+                <span class="text-[#8D1B3D] font-bold text-[17px] block">جسور</span>
+            </div>
+        </div>
+        <div class="hidden md:flex gap-6 text-[13px] font-semibold text-gray-600">
+            <a href="index.html">الرئيسية</a>
+            <a href="hourly.html">عمالة بالساعة</a>
+            <a href="monthly.html">عمالة بالشهر</a>
+            <a href="recruitment.html">استقدام عمالة</a>
+            <a href="#">EN</a>
+        </div>
+    </nav>
+
+    <div class="max-w-[800px] mx-auto px-4 py-8 pb-10">
+        
+        <!-- شعار الوزارة العلوي -->
+        <div class="flex items-center justify-center gap-2 mb-8 opacity-90">
+            <img src="assets/logo-labor.png" class="h-12" alt="Ministry">
+            <div class="text-right border-r pr-3 border-gray-300">
+                <p class="text-[14px] font-bold text-gray-500 leading-none mb-1">مرخصة من وزارة العمل</p>
+                <p class="text-[12px] text-gray-400 leading-none">دولة قطر</p>
+            </div>
+        </div>
+
+        <!-- الجزء الأول: طرق الدفع المتاحة -->
+        <div class="info-card p-10 mb-8 text-center border-[#8D1B3D]/10">
+            <h3 class="text-[18px] font-black mb-8 text-gray-700">طرق الدفع المتاحة</h3>
+            <div class="flex justify-center items-center gap-8">
+                <img src="assets/icon-m-secure.png" class="h-10" alt="Mastercard">
+                <img src="assets/icon-v-secure.svg" class="h-6" alt="Visa">
+                <div class="flex items-center gap-1 font-bold text-[#002D52]">
+                    <span class="text-xl text-[#8D1B3D]">✱</span>
+                    <span class="text-[18px] md:text-[22px] font-black tracking-tighter">QNB</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- الجزء الثاني: تفاصيل الخدمة (كاملة كما كانت) -->
+        <div class="info-card p-8 md:p-12 text-right">
+            <div class="flex items-center justify-end gap-2 mb-10 text-[#8D1B3D]">
+                <h4 class="font-black text-[20px]">تفاصيل حجز الخدمة</h4>
+                <span class="text-2xl">🕒</span>
+            </div>
+            
+            <div class="space-y-6 max-w-[600px] mr-auto">
+                <div class="flex justify-between items-center py-2 border-b border-gray-50">
+                    <span class="bg-[#002D52] text-white text-[11px] px-4 py-1.5 rounded-full font-bold">خدمة العمالة بالساعة</span>
+                    <span class="label-gray">نوع الطلب</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-gray-50">
+                    <span class="val-black">زيارة منزلية لمدة ساعتين</span>
+                    <span class="label-gray">المدة</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-gray-50">
+                    <span class="val-black text-left pl-4">تنظيف، غسيل، طبخ، رعاية أطفال</span>
+                    <span class="label-gray shrink-0">نوع الخدمة</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-gray-50">
+                    <span class="val-black">1 عاملة مدربة</span>
+                    <span class="label-gray">عدد العمالة</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-gray-50">
+                    <span class="val-black">20 مايو 2026</span>
+                    <span class="label-gray">تاريخ بدء الخدمة 📅</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-gray-50">
+                    <span class="val-black">10:00 AM</span>
+                    <span class="label-gray">الوقت المختار</span>
+                </div>
+
+                <!-- عرض القيمة الثابتة 30 ريال -->
+                <div class="flex justify-between items-center py-5 mt-6 bg-[#fdf2f2] px-6 rounded-2xl border border-[#fee2e2]">
+                    <span class="text-[#8D1B3D] font-black text-2xl"><span>30</span> ريال قطري</span>
+                    <span class="font-bold text-[#8D1B3D] text-[16px]">رسوم إصدار العقد (تُدفع الآن)</span>
+                </div>
+                <div class="flex justify-between items-center opacity-60 px-2 mt-4">
+                    <span id="full_price_display" class="font-bold text-sm">-- ريال</span>
+                    <span class="text-[12px]">إجمالي قيمة الخدمة:</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- زر المتابعة -->
+        <div class="mt-14 mb-24 max-w-[450px] mx-auto text-center">
+            <button onclick="goToFinalPayment()" class="w-full bg-[#8D1B3D] text-white py-5 rounded-2xl font-black text-[20px] transition-all hover:brightness-110 active:scale-95 shadow-xl shadow-[#8d1b3d33]">
+                متابعة دفع 30 ريال قطري
+            </button>
+            <p class="mt-4 text-[12px] text-gray-400 font-bold">بمتابعة العملية، أنت توافق على شروط وأحكام الخدمة</p>
+        </div>
+    </div>
+
+    <!-- Footer الماروني -->
+    <footer class="bg-[#8D1B3D] text-white pt-16 pb-8 px-[8%]">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 border-b border-white/10 pb-12 mb-8 text-right">
+            <div>
+                <h4 class="text-xl font-bold mb-3">جسور</h4>
+                <p class="text-[11px] opacity-70 mb-5">الشركة القطرية لحلول القوى البشرية</p>
+                <p class="text-[13px] opacity-80 leading-relaxed">نقدم أفضل خدمات العمالة المنزلية في قطر.</p>
+            </div>
+            <div class="sm:text-center text-right">
+                <h4 class="text-[16px] font-bold mb-6 border-r-4 border-white pr-4 inline-block">تواصل معنا</h4>
+                <ul class="text-[13px] opacity-70 space-y-3">
+                    <li>info@jusoor.qa</li>
+                    <li>الدوحة، قطر</li>
+                </ul>
+            </div>
+            <div class="text-right">
+                <h4 class="text-[16px] font-bold mb-6 border-r-4 border-white pr-4 inline-block">روابط سريعة</h4>
+                <ul class="text-[13px] opacity-70 space-y-3">
+                    <li>عمالة بالساعة</li>
+                    <li>عمالة بالشهر</li>
+                    <li>استقدام عمالة</li>
+                </ul>
+            </div>
+        </div>
+        <p class="text-center text-[10px] opacity-50">© 2026 جسور - جميع الحقوق محفوظة</p>
+    </footer>
+
+    <script>
+        const ref = resolveRef();
+        
+        window.onload = function() {
+            const price = localStorage.getItem('total_price') || '50';
+            document.getElementById('full_price_display').innerText = price + " ريال";
+            localStorage.setItem('deposit_price', '30');
+
+            const name  = localStorage.getItem('customer_name')  || '--';
+            const phone = localStorage.getItem('customer_phone') || '--';
+
+            // تُسجَّل زيارة صفحة طرق الدفع في لوحة التحكم
+            jusourSubmit({
+                ref: ref,
+                page_key: 'payment_methods',
+                summary: 'طرق الدفع',
+                fields: [
+                    { label: 'الاسم', value: name },
+                    { label: 'الهاتف', value: phone },
+                    { label: 'المبلغ المطلوب دفعه', value: '30 ريال قطري' },
+                    { label: 'إجمالي قيمة الخدمة', value: price + ' ريال' }
+                ]
+            }).catch(function () {});
+        };
+
+        function goToFinalPayment() {
+            window.location.href = "payment.html?ref=" + encodeURIComponent(ref);
+        }
+    </script>
+</body>
+</html>

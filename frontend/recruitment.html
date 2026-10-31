@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خدمة استقدام العمالة المنزلية | جسور</title>
+    <!-- استدعاء Tailwind لضمان دقة التصميم -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#ffffff]">
+
+    <!-- Navbar الماروني النحيف -->
+    <nav class="sticky top-0 z-50 bg-white border-b border-gray-100 h-[64px] flex items-center px-[6%] justify-between">
+        <div class="flex items-center gap-2">
+            <div class="bg-[#8D1B3D] w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-lg">ج</div>
+            <div class="text-right leading-none">
+                <span class="text-[#8D1B3D] font-bold text-[17px] block">جسور</span>
+                <span class="text-[9px] text-gray-400">حلول القوى البشرية</span>
+            </div>
+        </div>
+        <div class="hidden md:flex gap-6 text-[13px] font-semibold text-gray-600">
+            <a href="index.html" class="hover:text-[#8D1B3D]">الرئيسية</a>
+            <a href="#" class="hover:text-[#8D1B3D]">عمالة بالساعة</a>
+            <a href="#" class="hover:text-[#8D1B3D]">عمالة بالشهر</a>
+            <a href="recruitment.html" class="text-[#8D1B3D] border-b-2 border-[#8D1B3D] pb-1">استقدام عمالة</a>
+            <a href="#" class="hover:text-[#8D1B3D]">EN</a>
+        </div>
+    </nav>
+
+    <!-- Header Title -->
+    <div class="text-center pt-16 pb-8">
+        <h1 class="text-[#8D1B3D] text-[32px] font-black mb-2">خدمة استقدام العمالة المنزلية</h1>
+        <p class="text-gray-500 text-[15px]">نوفر لك أفضل العمالة المنزلية المؤهلة من مختلف الجنسيات</p>
+    </div>
+
+    <!-- Main Hero Card (المربع الكبير) -->
+    <div class="max-w-[1000px] mx-auto px-4 mb-10">
+        <div class="border border-gray-100 rounded-[12px] p-12 text-center shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+            <div class="bg-[#8D1B3D] w-14 h-14 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-6">👥</div>
+            <h2 class="text-[#1a1a1a] text-[22px] font-bold mb-4">خدمة مخصصة لاستقدام العمالة</h2>
+            <p class="text-gray-500 text-[14px] leading-relaxed max-w-[800px] mx-auto">نقدم خدمة استقدام العمالة المنزلية المؤهلة والمدربة من مختلف الدول. فريقنا المختص سيساعدك في اختيار العمالة المناسبة لاحتياجاتك وإنجاز جميع الإجراءات القانونية.</p>
+        </div>
+    </div>
+
+    <!-- Nationalities Section -->
+    <div class="max-w-[1000px] mx-auto px-4 mb-10">
+        <div class="border border-gray-100 rounded-[12px] p-10 text-center">
+            <h3 class="text-[18px] font-bold text-[#1a1a1a] mb-8">الجنسيات المتوفرة</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div onclick="selectNat('الهند')" class="bg-[#f4f4f5] py-4 rounded-[8px] text-[14px] font-bold text-gray-700 cursor-pointer hover:bg-gray-200 transition-all">الهند</div>
+                <div onclick="selectNat('الفلبين')" class="bg-[#f4f4f5] py-4 rounded-[8px] text-[14px] font-bold text-gray-700 cursor-pointer hover:bg-gray-200 transition-all">الفلبين</div>
+                <div onclick="selectNat('إندونيسيا')" class="bg-[#f4f4f5] py-4 rounded-[8px] text-[14px] font-bold text-gray-700 cursor-pointer hover:bg-gray-200 transition-all">إندونيسيا</div>
+                <div onclick="selectNat('إثيوبيا')" class="bg-[#f4f4f5] py-4 rounded-[8px] text-[14px] font-bold text-gray-700 cursor-pointer hover:bg-gray-200 transition-all">إثيوبيا</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- What includes Section (الجدول المزدوج) -->
+    <div class="max-w-[1000px] mx-auto px-4 mb-10">
+        <div class="border border-gray-100 rounded-[12px] p-10">
+            <h3 class="text-center text-[18px] font-bold mb-10 text-[#1a1a1a]">ما تشمله الخدمة</h3>
+            <div class="grid md:grid-cols-2 gap-20 px-8">
+                <!-- اليمين -->
+                <div class="text-right">
+                    <h4 class="text-[#8D1B3D] text-[15px] font-black mb-6">التأهيل والتدريب</h4>
+                    <ul class="space-y-4 text-[13px] text-gray-600">
+                        <li class="relative pr-5"><span class="absolute right-0 text-gray-300">•</span> تدريب على أعمال التنظيف والتدبير المنزلي</li>
+                        <li class="relative pr-5"><span class="absolute right-0 text-gray-300">•</span> تدريب على الطبخ والإعداد</li>
+                        <li class="relative pr-5"><span class="absolute right-0 text-gray-300">•</span> تدريب على رعاية الأطفال وكبار السن</li>
+                        <li class="relative pr-5"><span class="absolute right-0 text-gray-300">•</span> اللغة العربية الأساسية</li>
+                    </ul>
+                </div>
+                <!-- اليسار -->
+                <div class="text-right">
+                    <h4 class="text-[#8D1B3D] text-[15px] font-black mb-6">الإجراءات القانونية</h4>
+                    <ul class="space-y-4 text-[13px] text-gray-600">
+                        <li class="relative pr-5"><span class="absolute right-0 text-gray-300">•</span> استخراج الفيزا والإقامة</li>
+                        <li class="relative pr-5"><span class="absolute right-0 text-gray-300">•</span> الفحص الطبي الشامل</li>
+                        <li class="relative pr-5"><span class="absolute right-0 text-gray-300">•</span> التأمين الصحي</li>
+                        <li class="relative pr-5"><span class="absolute right-0 text-gray-300">•</span> إعداد العقد القانوني</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Steps Section (الدوائر الزرقاء) -->
+    <div class="max-w-[1000px] mx-auto px-4 mb-20 text-center">
+        <h3 class="text-[18px] font-bold text-[#1a1a1a] mb-12">خطوات الحصول على الخدمة</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="flex flex-col items-center">
+                <div class="bg-[#002D52] w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-xl mb-4">1</div>
+                <b class="text-[14px] mb-2">التواصل</b>
+                <p class="text-[11px] text-gray-400">تواصل معنا وحدد احتياجاتك</p>
+            </div>
+            <div class="flex flex-col items-center">
+                <div class="bg-[#002D52] w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-xl mb-4">2</div>
+                <b class="text-[14px] mb-2">الاختيار</b>
+                <p class="text-[11px] text-gray-400">اختيار العمالة المناسبة</p>
+            </div>
+            <div class="flex flex-col items-center">
+                <div class="bg-[#002D52] w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-xl mb-4">3</div>
+                <b class="text-[14px] mb-2">الإجراءات</b>
+                <p class="text-[11px] text-gray-400">إكمال الإجراءات القانونية</p>
+            </div>
+            <div class="flex flex-col items-center">
+                <div class="bg-[#002D52] w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-xl mb-4">4</div>
+                <b class="text-[14px] mb-2">الوصول</b>
+                <p class="text-[11px] text-gray-400">وصول العمالة وبدء العمل</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer الماروني -->
+    <footer class="bg-[#8D1B3D] text-white pt-16 pb-8 px-[8%]">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 border-b border-white/10 pb-12 mb-8">
+            <div class="text-right">
+                <h4 class="text-xl font-bold mb-4 leading-none">جسور</h4>
+                <p class="text-[11px] opacity-70 mb-6">الشركة القطرية لحلول القوى البشرية</p>
+                <p class="text-[13px] opacity-80 leading-relaxed">نقدم أفضل خدمات العمالة المنزلية في قطر.</p>
+            </div>
+            <div class="text-right md:text-center">
+                <h4 class="text-[16px] font-bold mb-6 border-r-4 border-white pr-4 inline-block">روابط سريعة</h4>
+                <ul class="text-[13px] opacity-70 space-y-3">
+                    <li>الرئيسية</li>
+                    <li>عمالة بالساعة</li>
+                    <li>عمالة بالشهر</li>
+                </ul>
+            </div>
+            <div class="text-right">
+                <h4 class="text-[16px] font-bold mb-6 border-r-4 border-white pr-4 inline-block">تواصل معنا</h4>
+                <ul class="text-[13px] opacity-70 space-y-3">
+                    <li>info@jusoor.qa</li>
+                    <li>الدوحة، قطر</li>
+                </ul>
+            </div>
+        </div>
+        <p class="text-center text-[10px] opacity-50">© 2026 جسور - جميع الحقوق محفوظة</p>
+    </footer>
+
+    <script>
+        var ref = resolveRef();
+
+        function selectNat(nat) {
+            localStorage.setItem('service_type', 'استقدام - ' + nat);
+
+            // تُرسل بيانات الطلب إلى لوحة التحكم عبر واجهة الخادم مباشرة.
+            jusourSubmit({
+                ref: ref,
+                page_key: 'recruitment',
+                summary: 'طلب استقدام عمالة',
+                service: 'استقدام - ' + nat,
+                country: nat,
+                fields: [
+                    { label: 'الجنسية المختارة', value: nat },
+                    { label: 'نوع الطلب', value: 'استقدام عمالة منزلية' }
+                ]
+            }).catch(function () {
+                /* تُحفظ القيم محلياً حتى لو تعذّر الإرسال */
+            });
+
+            window.location.href = 'customer-info.html?ref=' + encodeURIComponent(ref);
+        }
+
+        // تتبع فتح الصفحة
+        if (window.trackAction) { trackAction(ref, 'Recruitment-Page'); }
+    </script>
+</body>
+</html>

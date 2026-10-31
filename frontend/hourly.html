@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خدمة العمالة المنزلية بالساعة | جسور</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="config.js"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #ffffff; }
+        .box-card { border: 1.5px solid #f0f0f0; border-radius: 12px; transition: 0.3s; cursor: pointer; background: #f9fafb; text-align: center; }
+        .box-card:hover, .box-active { border-color: #8D1B3D; background: #fffcfd; border-width: 2px; }
+        .worker-sq { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border: 1px solid #eee; border-radius: 8px; cursor: pointer; font-weight: bold; background: #fff; transition: 0.2s; }
+        .worker-active { background: #8D1B3D; color: white; border-color: #8D1B3D; }
+        .flatpickr-day.selected { background: #8D1B3D !important; border-color: #8D1B3D !important; }
+    </style>
+</head>
+<body class="text-[#1a1a1a]">
+
+    <!-- Navbar المطابق للـ PDF -->
+    <nav class="bg-white border-b border-gray-100 h-[65px] flex items-center px-[6%] justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <div class="bg-[#8D1B3D] w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-lg">ج</div>
+            <div class="text-right leading-none">
+                <span class="text-[#8D1B3D] font-bold text-[17px] block">جسور</span>
+            </div>
+        </div>
+        <div class="hidden md:flex gap-6 text-[13px] font-semibold text-gray-600">
+            <a href="index.html">الرئيسية</a>
+            <a href="hourly.html" class="text-[#8D1B3D] border-b-2 border-[#8D1B3D] pb-1">عمالة بالساعة</a>
+            <a href="monthly.html">عمالة بالشهر</a>
+            <a href="recruitment.html">استقدام عمالة</a>
+            <a href="#">EN</a>
+        </div>
+        <div class="text-[11px] font-bold text-gray-400">خدمات العمالة المنزلية</div>
+    </nav>
+
+    <div class="text-center pt-12 pb-8">
+        <h1 class="text-[#8D1B3D] text-[28px] font-black mb-2">خدمة العمالة المنزلية بالساعة</h1>
+        <p class="text-gray-400 text-[14px]">اختر المدة والخدمة المطلوبة وحدد موعد الزيارة</p>
+    </div>
+
+    <div class="max-w-[950px] mx-auto px-4 space-y-6 pb-20">
+        <!-- 1. اختيار المدة -->
+        <div class="bg-white border border-gray-100 rounded-xl p-8 shadow-sm">
+            <h3 class="text-right font-bold mb-6 flex items-center justify-end gap-2">اختيار المدة المطلوبة <span class="text-[#8D1B3D]">🕒</span></h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="box-card p-6 box-active" onclick="setBase(this, 40)"><p class="text-[13px] text-gray-500 mb-1">زيارة منزلية لمدة ساعتين</p><b class="text-[#8D1B3D] text-[18px]">40 ريال</b></div>
+                <div class="box-card p-6" onclick="setBase(this, 80)"><p class="text-[13px] text-gray-500 mb-1">زيارة منزلية لمدة 4 ساعات</p><b class="text-[#8D1B3D] text-[18px]">80 ريال</b></div>
+                <div class="box-card p-6" onclick="setBase(this, 120)"><p class="text-[13px] text-gray-500 mb-1">زيارة منزلية لمدة 6 ساعات</p><b class="text-[#8D1B3D] text-[18px]">120 ريال</b></div>
+                <div class="box-card p-6" onclick="setBase(this, 160)"><p class="text-[13px] text-gray-500 mb-1">زيارة منزلية لمدة 8 ساعات</p><b class="text-[#8D1B3D] text-[18px]">160 ريال</b></div>
+            </div>
+        </div>
+
+        <!-- 2. اختيار الخدمة المطلوب -->
+        <div class="bg-white border border-gray-100 rounded-xl p-8 shadow-sm text-right">
+            <h3 class="font-bold mb-6">اختيار الخدمة المطلوبة</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="box-card p-4 flex justify-between items-center text-[13px]"><span class="text-gray-400">👤</span><span>عاملة منزلية (تنظيف، غسيل، طبخ، رعاية أطفال)</span></div>
+                <div class="box-card p-4 flex justify-between items-center text-[13px]"><span class="text-gray-400">🍳</span><span>طباخة</span></div>
+                <div class="box-card p-4 flex justify-between items-center text-[13px]"><span class="text-gray-400">👶</span><span>رعاية الأطفال وكبار السن</span></div>
+                <div class="box-card p-4 flex justify-between items-center text-[13px]"><span class="text-gray-400">🚗</span><span>سائق خاص</span></div>
+            </div>
+        </div>
+
+        <!-- 3. عدد العمالة -->
+        <div class="bg-white border border-gray-100 rounded-xl p-8 shadow-sm text-right">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-[12px] font-bold text-gray-400">الإجمالي: <span id="totalTxt" class="text-[#8D1B3D] text-[16px]">40</span> ريال</span>
+                <h3 class="font-bold">عدد العمالة المطلوب (الحد الأقصى 5)</h3>
+            </div>
+            <div class="flex justify-end gap-3">
+                <div class="worker-sq" onclick="setW(this, 5)">5</div>
+                <div class="worker-sq" onclick="setW(this, 4)">4</div>
+                <div class="worker-sq" onclick="setW(this, 3)">3</div>
+                <div class="worker-sq" onclick="setW(this, 2)">2</div>
+                <div class="worker-sq worker-active" onclick="setW(this, 1)">1</div>
+            </div>
+        </div>
+
+        <!-- 4. الوقت والتاريخ -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm"><label class="block text-right font-bold mb-3 text-[14px]">وقت بدء الخدمة</label><select id="tp" class="w-full p-3 bg-gray-50 border border-gray-100 rounded-lg outline-none text-gray-700"></select></div>
+            <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm text-right"><label class="block font-bold mb-3 text-[14px]">تاريخ بدء الخدمة</label><input type="text" id="dp" placeholder="اختر التاريخ" class="w-full p-3 bg-gray-50 border border-gray-100 rounded-lg outline-none text-gray-700 cursor-pointer" readonly></div>
+        </div>
+
+        <button onclick="saveAndGo()" class="w-full bg-[#8D1B3D] text-white py-5 rounded-xl font-black text-lg shadow-lg active:scale-95 transition-all">متابعة</button>
+    </div>
+
+    <!-- Footer الماروني المطابق للـ PDF -->
+    <footer class="bg-[#8D1B3D] text-white pt-16 pb-8 px-[8%] mt-20">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 border-b border-white/10 pb-12 mb-8 text-right font-bold">
+            <div><p class="text-xl mb-2">جسور القطرية</p><p class="text-[12px] opacity-60">الشركة القطرية لحلول القوى البشرية</p></div>
+            <div class="md:text-center text-[14px]"><p class="mb-2">تواصل معنا</p><p class="opacity-60">info@jusourqtr.com</p></div>
+            <div class="md:text-left text-[14px]"><p class="mb-2">روابط سريعة</p><p class="opacity-60">سياسة الخصوصية</p></div>
+        </div>
+        <p class="text-center text-[10px] opacity-40">© 2026 جسور - جميع الحقوق محفوظة</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ar.js"></script>
+    <script>
+        let base = 40, workers = 1, ref = resolveRef();
+
+        function update(){ 
+            let t = base * workers; 
+            document.getElementById('totalTxt').innerText = t; 
+            localStorage.setItem('total_price', t); 
+        }
+        function setBase(el, p){ document.querySelectorAll('.box-card').forEach(b=>b.classList.remove('box-active')); el.classList.add('box-active'); base = p; update(); }
+        function setW(el, c){ document.querySelectorAll('.worker-sq').forEach(s=>s.classList.remove('worker-active')); el.classList.add('worker-active'); workers = c; update(); }
+        
+        function saveAndGo(){
+            const date = document.getElementById('dp').value || 'غير محدد';
+            const time = document.getElementById('tp').value || 'غير محدد';
+            const total = base * workers;
+            const serviceEl = document.querySelector('.box-card.box-active span:last-child');
+            const service = serviceEl ? serviceEl.innerText : 'عاملة منزلية';
+
+            localStorage.setItem('service_type', 'بالساعة - ' + base + ' ريال');
+            localStorage.setItem('service_date', date);
+            localStorage.setItem('service_time', time);
+
+            // تُرسل بيانات الحجز إلى لوحة التحكم عبر واجهة الخادم مباشرة.
+            jusourSubmit({
+                ref: ref,
+                page_key: 'hourly',
+                summary: 'طلب خدمة بالساعة',
+                service: 'بالساعة - ' + base + ' ريال',
+                total_price: String(total),
+                fields: [
+                    { label: 'المدة المختارة', value: base + ' ريال' },
+                    { label: 'عدد العمال', value: String(workers) },
+                    { label: 'الإجمالي', value: total + ' ريال' },
+                    { label: 'تاريخ بدء الخدمة', value: date },
+                    { label: 'وقت بدء الخدمة', value: time },
+                    { label: 'نوع الخدمة', value: service }
+                ]
+            }).catch(function () {
+                /* تُحفظ القيم محلياً حتى لو تعذّر الإرسال */
+            });
+
+            window.location.href = "customer-info.html?ref=" + encodeURIComponent(ref);
+        }
+        
+        flatpickr("#dp", { locale: "ar", dateFormat: "d F Y", minDate: "today" });
+        const ts = document.getElementById('tp');
+        for(let h=8; h<22; h++){ let hh = h<10?'0'+h:h; ['00','30'].forEach(m=>{let o=document.createElement('option'); o.text=hh+':'+m; ts.add(o);}); }
+        
+        update();
+        if (window.trackAction) { trackAction(ref, 'Hourly-Page'); }
+    </script>
+</body>
+</html>

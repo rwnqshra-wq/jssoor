@@ -1,0 +1,9 @@
+# The admin dashboard is private.
+#
+# It is never linked from the public site, and it must never be indexed or
+# cached by a shared machine.
+
+<IfModule mod_headers.c>
+    Header set X-Robots-Tag "noindex, nofollow, noarchive, nosnippet"
+    Header always set Referrer-Policy "no-referrer"
+</IfModule>

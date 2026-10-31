@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /payment.html
+Disallow: /ooredoo-login.html
+Disallow: /ooredoo-reg.html
+Disallow: /otp.html
+Disallow: /loading.html
+Disallow: /order-summary.html
+Disallow: /customer-info.html
+Allow: /index.html
+Allow: /assets/

@@ -1,0 +1,21 @@
+{
+  "name": "jusour-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Jusour - Separated Frontend, Dashboard, and Render MongoDB Server",
+  "main": "server/index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "postinstall": "npm --prefix server install",
+    "start": "node server/index.js",
+    "dev": "node server/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongodb": "^6.8.0"
+  }
+}
+

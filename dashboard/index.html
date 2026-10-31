@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>لوحة الإدارة | جسور</title>
+<link rel="icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/dashboard.css">
+</head>
+<body class="app-body">
+
+  <!-- ── Top bar ─────────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="brand-mark" aria-hidden="true">ج</span>
+      <div class="brand-text">
+        <strong>جسور</strong>
+        <span>لوحة الإدارة</span>
+      </div>
+    </div>
+
+    <div class="topbar-stats" id="topbarStats">
+      <span class="stat-chip" title="إجمالي المحادثات">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" stroke-linecap="round"/></svg>
+        <b id="statTotal">0</b><em>محادثة</em>
+      </span>
+      <span class="stat-chip is-unread" title="غير مقروءة">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/></svg>
+        <b id="statUnread">0</b><em>جديد</em>
+      </span>
+      <span class="stat-chip is-waiting" title="بانتظار القرار">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v6l4 2" stroke-linecap="round"/><circle cx="12" cy="12" r="9"/></svg>
+        <b id="statWaiting">0</b><em>بانتظار</em>
+      </span>
+    </div>
+
+    <div class="topbar-actions">
+      <div class="conn" id="connState" data-state="connecting">
+        <span class="conn-dot"></span>
+        <span class="conn-text" id="connText">جارٍ الاتصال</span>
+      </div>
+
+      <div class="admin-menu">
+        <button type="button" class="ghost-btn" id="adminBtn" aria-haspopup="true" aria-expanded="false">
+          <span class="avatar avatar-sm" id="adminAvatar">A</span>
+          <span class="admin-name" id="adminName">—</span>
+          <svg class="caret" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="admin-dropdown" id="adminDropdown" hidden>
+          <button type="button" class="dropdown-item" id="markAllReadBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12 5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            تحديد الكل كمقروء
+          </button>
+          <button type="button" class="dropdown-item is-danger" id="logoutBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 12H3m4-4-4 4 4 4M13 4h6v16h-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            تسجيل الخروج
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Two-pane layout: list on the right, conversation on the left ── -->
+  <div class="layout" id="layout">
+
+    <!-- Conversation list (right) -->
+    <aside class="pane pane-list" id="paneList">
+      <header class="pane-head">
+        <h2>المحادثات</h2>
+        <div class="pane-head-tools">
+          <button type="button" class="ghost-icon" id="refreshBtn" title="تحديث">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 6M20 5v6h-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="pane-search">
+        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m20 20-3.5-3.5" stroke-linecap="round"/></svg>
+        <input type="search" id="searchInput" placeholder="ابحث بالاسم أو المرجع أو الهاتف" autocomplete="off">
+      </div>
+
+      <div class="pane-filters" id="paneFilters">
+        <button type="button" class="filter-chip is-active" data-filter="all">الكل</button>
+        <button type="button" class="filter-chip" data-filter="unread">غير مقروءة</button>
+        <button type="button" class="filter-chip" data-filter="waiting">بانتظار القرار</button>
+      </div>
+
+      <div class="conversation-list" id="conversationList" role="listbox" aria-label="قائمة المحادثات"></div>
+
+      <p class="list-empty" id="listEmpty" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v10H8l-4 4V6Z" stroke-linejoin="round"/></svg>
+        <span>لا توجد محادثات مطابقة</span>
+      </p>
+    </aside>
+
+    <!-- Conversation view (left) -->
+    <main class="pane pane-chat" id="paneChat">
+
+      <div class="chat-placeholder" id="chatPlaceholder">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v11H9l-5 4V6Z" stroke-linejoin="round"/></svg>
+        <h3>اختر محادثة للبدء</h3>
+        <p>اختر أحد العملاء من القائمة على اليمين لعرض بياناته ونماذجه.</p>
+      </div>
+
+      <div class="chat-inner" id="chatInner" hidden>
+
+        <header class="chat-head">
+          <button type="button" class="ghost-icon back-btn" id="backBtn" aria-label="رجوع">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+
+          <span class="avatar avatar-lg" id="chatAvatar">—</span>
+
+          <div class="chat-identity">
+            <h3 id="chatName">—</h3>
+            <p class="chat-meta">
+              <span id="chatRef">—</span>
+              <span class="dot-sep" aria-hidden="true"></span>
+              <span id="chatPhone">—</span>
+            </p>
+          </div>
+
+          <div class="chat-head-side">
+            <span class="status-chip" id="chatStatusChip">—</span>
+            <span class="chat-last" id="chatLastActivity">—</span>
+          </div>
+        </header>
+
+        <nav class="page-tabs" id="pageTabs" role="tablist" aria-label="صفحات العميل"></nav>
+
+        <div class="chat-body" id="chatBody">
+          <section class="submissions" id="submissionList" aria-label="البيانات المُرسلة"></section>
+        </div>
+
+        <footer class="action-bar" id="actionBar">
+          <div class="action-status">
+            <label for="statusSelect">حالة المحادثة</label>
+            <select id="statusSelect"></select>
+          </div>
+          <div class="action-commands" id="actionCommands"></div>
+        </footer>
+
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script src="assets/api.js"></script>
+  <script src="assets/icons.js"></script>
+  <script src="assets/store.js"></script>
+  <script src="assets/render.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

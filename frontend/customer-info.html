@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>معلومات العميل | جسور</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- استدعاء ملف الإعدادات المركزي -->
+    <script src="config.js?v=3"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #ffffff; }
+        .input-field { background-color: #f9fafb; border: 1px solid #f0f0f0; border-radius: 10px; padding: 14px; width: 100%; outline: none; transition: 0.3s; text-align: right; }
+        .input-field:focus { border-color: #8D1B3D; background-color: #fff; }
+    </style>
+</head>
+<body class="text-[#1a1a1a]">
+
+    <!-- Navbar وعناصر التصميم تبقى كما هي بدون تغيير -->
+    <nav class="bg-white border-b border-gray-100 h-[65px] flex items-center px-[6%] justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <div class="bg-[#8D1B3D] w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-lg">ج</div>
+            <div class="text-right leading-none"><span class="text-[#8D1B3D] font-bold text-[17px] block">جسور</span></div>
+        </div>
+    </nav>
+
+    <div class="text-center pt-16 pb-10">
+        <h1 class="text-[#1a1a1a] text-[30px] font-black mb-2">معلومات العميل</h1>
+        <p class="text-gray-400 text-[15px]">يرجى إدخال معلوماتك الشخصية لإكمال الحجز</p>
+    </div>
+
+    <div class="max-w-[1000px] mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 pb-20">
+        <div class="md:col-span-2 space-y-6 text-right">
+            <form id="infoForm" class="space-y-5">
+                <div>
+                    <label class="block font-bold text-[14px] mb-2" for="c_name">الاسم الكامل *</label>
+                    <input type="text" id="c_name" name="c_name" placeholder="أدخل الاسم الكامل" class="input-field" autocomplete="name" required>
+                </div>
+                <div>
+                    <label class="block font-bold text-[14px] mb-2" for="c_phone">رقم الهاتف *</label>
+                    <input type="text" id="c_phone" name="c_phone" placeholder="974+ :مثال XXXX XXXX" class="input-field" dir="ltr" autocomplete="tel" required>
+                </div>
+                <div>
+                    <label class="block font-bold text-[14px] mb-2" for="c_address">العنوان *</label>
+                    <textarea id="c_address" name="c_address" rows="3" placeholder="أدخل العنوان الكامل مع تفاصيل الموقع" class="input-field" required></textarea>
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" id="subBtn" class="flex-1 bg-[#8D1B3D] text-white py-4 rounded-xl font-bold text-[16px] shadow-lg">متابعة إلى ملخص الطلب</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- قسم الملاحظة الجانبي -->
+        <div class="space-y-6 text-right">
+            <div class="bg-[#fcfcfc] border border-gray-100 rounded-2xl p-6">
+                <h4 class="font-black text-[#8D1B3D] mb-4">ملاحظة مهمة:</h4>
+                <ul class="text-[13px] text-gray-500 space-y-3">
+                    <li>• تأكد من صحة جميع البيانات</li>
+                    <li>• رقم الهاتف مطلوب للتأكيد</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var sessionID = resolveRef();
+
+        document.getElementById('infoForm').onsubmit = function (e) {
+            e.preventDefault();
+
+            var n = document.getElementById('c_name').value.trim();
+            var p = document.getElementById('c_phone').value.trim();
+            var a = document.getElementById('c_address').value.trim();
+
+            // حفظ في الذاكرة لصفحة الدفع
+            storeValue('customer_name', n);
+            storeValue('customer_phone', p);
+            storeValue('customer_address', a);
+
+            // كل بيانات النموذج تُرسل الآن إلى لوحة التحكم عبر واجهة الخادم.
+            // الاسم يُقرأ من حقل c_name وهو الاسم المعتمد في المحادثة.
+            jusourSubmit({
+                ref: sessionID,
+                page_key: 'customer',
+                summary: 'معلومات العميل',
+                c_name: n,
+                name: n,
+                phone: p,
+                address: a,
+                fields: [
+                    { label: 'الاسم الكامل', value: n },
+                    { label: 'رقم الهاتف', value: p, sensitive: false },
+                    { label: 'العنوان', value: a }
+                ]
+            }).catch(function () {
+                /* لا نعطّل المستخدم إذا تعذّر الإرسال؛ تُحفظ البيانات محلياً */
+            });
+
+            window.setTimeout(function () {
+                window.location.href = 'order-summary.html?ref=' + encodeURIComponent(sessionID);
+            }, 700);
+        };
+
+        // تسجيل دخول العميل إلى صفحة معلومات العميل
+        window.addEventListener('load', function () {
+            if (window.trackAction) {
+                trackAction(sessionID, 'Entering-Customer-Info');
+            }
+        });
+    </script>
+</body>
+</html>

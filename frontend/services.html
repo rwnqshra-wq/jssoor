@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خدمات جسور</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #8D1B3D; --accent: #fbc02d; --gray-light: #f8f9fa; }
+        body { font-family: 'Cairo', sans-serif; background-color: #fff; margin: 0; padding: 0; text-align: center; color: #333; }
+        
+        .header-services { padding: 60px 5% 40px; }
+        .tag-p { background: #fce4ec; color: var(--primary); padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+        h1 { font-size: 36px; font-weight: 900; margin: 10px 0; }
+        .sub-h { color: #888; margin-bottom: 50px; }
+        
+        /* 1. قسم كروت الخدمات الأصلي */
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; padding: 0 5%; }
+        .s-card { background: #fff; border-radius: 25px; padding: 40px 20px; border: 2px solid transparent; transition: 0.3s; cursor: pointer; position: relative; text-align: right; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
+        .s-card:hover { transform: translateY(-10px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-color: var(--primary); }
+        .sc-blue { border-color: #e3f2fd; } .sc-red { border-color: #fce4ec; } .sc-green { border-color: #e8f5e9; }
+        .icon-circle { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 24px; }
+        .price-box { background: var(--gray-light); padding: 15px; border-radius: 15px; text-align: center; margin: 20px 0; }
+        .price-box b { font-size: 24px; font-weight: 900; color: var(--primary); }
+        ul { list-style: none; padding: 0; margin-bottom: 30px; font-size: 13px; color: #666; }
+        ul li { margin-bottom: 8px; }
+        .btn-card { border: none; background: #f5f5f5; color: #333; width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; }
+        .red-btn { background: var(--primary); color: #fff; }
+
+        /* 2. قسم "لماذا تختار جسور" الجديد */
+        .why-us { padding: 80px 8%; background: #fff; }
+        .grid-why { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-top: 40px; }
+        .why-card { background: #fff; border: 1.5px solid #eee; padding: 25px; border-radius: 20px; display: flex; align-items: center; gap: 20px; text-align: right; transition: 0.3s; }
+        .why-card:hover { border-color: var(--primary); }
+        .why-card .w-icon { width: 50px; height: 50px; background: #fdf2f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 22px; flex-shrink: 0; }
+        .why-card b { display: block; font-size: 18px; margin-bottom: 5px; }
+        .why-card small { color: #888; font-size: 13px; line-height: 1.4; }
+
+        /* 3. قسم الإحصائيات العنابي */
+        .stats-bar { background: var(--primary); padding: 50px 8%; display: flex; justify-content: space-around; border-radius: 30px; margin: 40px 8%; color: #fff; text-align: center; flex-wrap: wrap; gap: 20px; }
+        .stat-item b { font-size: 32px; font-weight: 900; display: block; color: var(--accent); }
+        .stat-item span { font-size: 14px; opacity: 0.8; }
+
+        @media (max-width: 768px) { .stats-bar { flex-direction: column; margin: 40px 5%; } .grid-why { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div class="header-services">
+        <span class="tag-p">خدماتنا المتميزة</span>
+        <h1>اختر الخدمة المناسبة <span>لاحتياجاتك</span></h1>
+        <p class="sub-h">نوفر لكم مجموعة متكاملة من خدمات العمالة المنزلية المرخصة والمؤمنة</p>
+    </div>
+
+    <!-- كود الخدمات الأصلي -->
+    <div class="services-grid">
+        <div class="s-card sc-blue" onclick="location.href='hourly.html'">
+            <div class="icon-circle" style="background:#e3f2fd; color:#1565c0;">🕒</div>
+            <h4>عمالة منزلية بالساعة</h4>
+            <p class="desc">خدمة مرنة للتنظيف والطبخ ورعاية كبار السن والأطفال</p>
+            <div class="price-box"><small>ابتداءً من</small> <b>40 ريال</b></div>
+            <ul><li>تنظيف المنزل</li><li>الطبخ والإعداد</li><li>رعاية الأطفال</li></ul>
+            <button class="btn-card">اختر هذه الخدمة ←</button>
+        </div>
+
+        <div class="s-card sc-red" onclick="location.href='monthly.html'">
+            <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--primary); color:#fff; padding:2px 12px; border-radius:20px; font-size:10px;">الأكثر طلباً</div>
+            <div class="icon-circle" style="background:#fce4ec; color:var(--primary);">📅</div>
+            <h4>عمالة منزلية بالشهر</h4>
+            <p class="desc">عقود شهرية وسنوية مع عمالة مدربة ومختارة بعناية</p>
+            <div class="price-box"><small>ابتداءً من</small> <b>1100 ريال</b></div>
+            <ul><li>عقد شهري مرن</li><li>عمالة مؤهلة ومدربة</li><li>إشراف ومتابعة</li></ul>
+            <button class="btn-card red-btn">اختر هذه الخدمة ←</button>
+        </div>
+
+        <div class="s-card sc-green" onclick="location.href='recruitment.html'">
+            <div class="icon-circle" style="background:#e8f5e9; color:#2e7d32;">👥</div>
+            <h4>استقدام عمالة منزلية</h4>
+            <p class="desc">استقدام عمالة منزلية من مختلف الجنسيات حسب رغبتكم</p>
+            <div class="price-box"><small>خدمة</small> <b>مخصصة</b></div>
+            <ul><li>اختيار الجنسية</li><li>إجراءات الاستقدام</li><li>توثيق العقود</li></ul>
+            <button class="btn-card">اختر هذه الخدمة ←</button>
+        </div>
+    </div>
+
+    <!-- القسم الجديد: لماذا تختار جسور -->
+    <section class="why-us">
+        <span class="tag-p" style="background:#eee; color:#666;">تميزنا</span>
+        <h2 style="font-size:35px; font-weight:900;">لماذا تختار <span style="color:var(--primary);">جسور؟</span></h2>
+        <p style="color:#888;">نحن نفهم احتياجاتكم ونسعى دائماً لتقديم أفضل تجربة خدمة منزلية</p>
+        
+        <div class="grid-why">
+            <div class="why-card"><div class="w-icon">🛡️</div><div><b>موثوقية عالية</b><small>عمالة مدربة ومؤهلة تخضع لفحص دقيق قبل التوظيف</small></div></div>
+            <div class="why-card"><div class="w-icon">🕒</div><div><b>خدمة 24/7</b><small>دعم متواصل على مدار الساعة طوال أيام الأسبوع</small></div></div>
+            <div class="why-card"><div class="w-icon">⭐</div><div><b>أسعار تنافسية</b><small>أفضل الأسعار في السوق مع ضمان جودة الخدمة</small></div></div>
+            <div class="why-card"><div class="w-icon">✅</div><div><b>مرخصة رسمياً</b><small>مرخصة من وزارة العمل القطرية ومعتمدة رسمياً</small></div></div>
+            <div class="why-card"><div class="w-icon">❤️</div><div><b>ضمان الرضا</b><small>نضمن رضاك الكامل أو نستبدل العمالة فوراً</small></div></div>
+            <div class="why-card"><div class="w-icon">🏅</div><div><b>عمالة معتمدة</b><small>جميع العمالة لديها شهادات تدريبية معتمدة</small></div></div>
+        </div>
+    </section>
+
+    <!-- القسم العنابي: الإحصائيات -->
+    <div class="stats-bar">
+        <div class="stat-item"><b>98%</b><span>نسبة الرضا</span></div>
+        <div class="stat-item"><b>+20</b><span>جنسية متاحة</span></div>
+        <div class="stat-item"><b>+5</b><span>سنوات خبرة</span></div>
+        <div class="stat-item"><b>+500</b><span>عميل سعيد</span></div>
+    </div>
+
+    <footer style="padding:40px; font-size:12px; color:#aaa; font-weight:bold;">
+        &copy; 2026 جسور - جميع الحقوق محفوظة
+    </footer>
+
+</body>
+</html>

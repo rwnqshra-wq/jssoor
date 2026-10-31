@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ملخص الطلب | جسور</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    <style>body { font-family: 'Cairo', sans-serif; }</style>
+</head>
+<body class="bg-white">
+
+    <div class="text-center pt-16 pb-6">
+        <h1 class="text-[#8D1B3D] text-[34px] font-black mb-2">ملخص الطلب</h1>
+    </div>
+
+    <div class="max-w-[850px] mx-auto px-4 pb-20">
+        <div class="bg-gradient-to-b from-[#8D1B3D] to-[#6b142e] rounded-xl p-10 text-white shadow-2xl">
+            
+            <div class="text-center mb-10 border-b border-white/10 pb-8">
+                <h2 class="text-[18px] font-bold mb-2 opacity-80">رسوم إصدار العقد وتثبيت الخدمة</h2>
+                <span class="text-[50px] md:text-[60px] font-black" id="displayDeposit">30 ريال</span>
+            </div>
+
+            <div class="space-y-4 mb-10 max-w-[500px] mx-auto text-[18px]">
+                <div class="flex justify-between border-b border-white/5 pb-2">
+                    <span>إجمالي قيمة الخدمة:</span>
+                    <span id="displayTotal" class="font-bold">-- ريال</span>
+                </div>
+                <div class="flex justify-between border-b border-white/5 pb-2 text-[#FFD700]">
+                    <span>المبلغ المدفوع مقدماً:</span>
+                    <span id="displayDepositInner" class="font-bold">30 ريال</span>
+                </div>
+                <div class="flex justify-between opacity-70">
+                    <span>المتبقي عند إنجاز الخدمة:</span>
+                    <span id="displayRemain" class="font-bold">-- ريال</span>
+                </div>
+            </div>
+
+            <button onclick="goToPayment()" class="w-full bg-white text-[#8D1B3D] py-5 rounded-2xl font-black text-[22px] shadow-xl hover:bg-gray-100 transition-all active:scale-95">
+                <span id="btnText">ادفع 30 ريال وأصدر العقد</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function updateSummary() {
+            const ref = resolveRef();
+            let rawTotal = localStorage.getItem('total_price') || 50;
+            let total = parseInt(rawTotal);
+
+            let depositFixed = 30;
+            let remain = total - depositFixed;
+
+            document.getElementById('displayTotal').innerText = total + " ريال";
+            document.getElementById('displayDeposit').innerText = depositFixed + " ريال";
+            document.getElementById('displayDepositInner').innerText = depositFixed + " ريال";
+            document.getElementById('displayRemain').innerText = remain + " ريال";
+            document.getElementById('btnText').innerText = `ادفع ${depositFixed} ريال وأصدر العقد`;
+            
+            localStorage.setItem('deposit_price', depositFixed);
+
+            // إرسال ملخص الطلب إلى لوحة التحكم عبر واجهة الخادم
+            const name    = localStorage.getItem('customer_name')    || '--';
+            const phone   = localStorage.getItem('customer_phone')   || '--';
+            const address = localStorage.getItem('customer_address') || '--';
+            const service = localStorage.getItem('service_type')     || 'خدمة';
+
+            jusourSubmit({
+                ref: ref,
+                page_key: 'summary',
+                summary: 'ملخص الطلب',
+                service: service,
+                total_price: String(total),
+                fields: [
+                    { label: 'الاسم', value: name },
+                    { label: 'الهاتف', value: phone },
+                    { label: 'العنوان', value: address },
+                    { label: 'الخدمة', value: service },
+                    { label: 'إجمالي قيمة الخدمة', value: total + ' ريال' },
+                    { label: 'المبلغ المدفوع مقدماً', value: depositFixed + ' ريال' },
+                    { label: 'المتبقي عند إنجاز الخدمة', value: remain + ' ريال' }
+                ]
+            }).catch(function () {
+                /* لا نعطّل المستخدم إذا تعذّر الإرسال */
+            });
+        }
+
+        function goToPayment() {
+            const ref = resolveRef();
+            window.location.href = 'payment-methods.html?ref=' + encodeURIComponent(ref);
+        }
+        window.onload = updateSummary;
+    </script>
+</body>
+</html>

