@@ -27,7 +27,7 @@
                 linear-gradient(135deg, #4A0B1D 0%, #8D1B3D 55%, #6B122C 100%);
         }
         .glass-nav {
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255, 255, 255, 0.94);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
         }
@@ -59,9 +59,15 @@
                 <span>منصة معتمدة ومرخصة رسمياً من وزارة العمل في دولة قطر</span>
             </div>
             <div class="hidden sm:flex items-center gap-4 text-xs text-white/75 font-medium">
-                <span>دعم متواصل 24/7</span>
-                <span>•</span>
-                <span>الدوحة، قطر</span>
+                <span class="inline-flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-[#D4AF37]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
+                    <span>دعم متواصل 24/7</span>
+                </span>
+                <span class="w-1 h-1 rounded-full bg-white/40"></span>
+                <span class="inline-flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-[#D4AF37]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10Z"/><circle cx="12" cy="11" r="2.2"/></svg>
+                    <span>الدوحة، قطر</span>
+                </span>
             </div>
         </div>
     </div>
@@ -69,15 +75,9 @@
     <!-- Sticky Navbar -->
     <header class="glass-nav border-b border-stone-200/80 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <!-- Brand -->
-            <a href="index.html" class="flex items-center gap-3 group">
-                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-[#8D1B3D] to-[#5C0F26] flex items-center justify-center text-white font-black text-xl shadow-md shadow-[#8D1B3D]/20 group-hover:scale-105 transition-transform">
-                    ج
-                </div>
-                <div class="text-right">
-                    <span class="text-[#8D1B3D] font-black text-xl sm:text-2xl block leading-tight">جسور</span>
-                    <span class="text-[10px] sm:text-[11px] text-stone-500 font-bold tracking-tight block">الشركة القطرية لحلول القوى البشرية</span>
-                </div>
+            <!-- Brand Logo Image -->
+            <a href="index.html" class="flex items-center">
+                <img src="assets/logo-labor.png" alt="الشركة القطرية لحلول القوى البشرية - جسور" class="h-11 sm:h-13 w-auto object-contain">
             </a>
 
             <!-- Desktop Links -->
@@ -106,10 +106,22 @@
 
         <!-- Mobile Dropdown Drawer -->
         <div id="mobileMenu" class="lg:hidden hidden border-t border-stone-200/80 bg-white px-4 pt-3 pb-5 space-y-2 shadow-xl">
-            <a href="index.html" class="block px-4 py-3 rounded-xl bg-[#8D1B3D]/10 text-[#8D1B3D] font-extrabold text-sm">الرئيسية</a>
-            <a href="hourly.html" class="block px-4 py-3 rounded-xl hover:bg-stone-100 text-stone-800 font-bold text-sm">🕒 عمالة منزلية بالساعة</a>
-            <a href="monthly.html" class="block px-4 py-3 rounded-xl hover:bg-stone-100 text-stone-800 font-bold text-sm">📅 عمالة منزلية بالشهر</a>
-            <a href="recruitment.html" class="block px-4 py-3 rounded-xl hover:bg-stone-100 text-stone-800 font-bold text-sm">👥 استقدام عمالة منزلية</a>
+            <a href="index.html" class="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-[#8D1B3D]/10 text-[#8D1B3D] font-extrabold text-sm">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z"/></svg>
+                <span>الرئيسية</span>
+            </a>
+            <a href="hourly.html" class="flex items-center gap-2.5 px-4 py-3 rounded-xl hover:bg-stone-100 text-stone-800 font-bold text-sm">
+                <svg class="w-4 h-4 text-[#8D1B3D] shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
+                <span>عمالة منزلية بالساعة</span>
+            </a>
+            <a href="monthly.html" class="flex items-center gap-2.5 px-4 py-3 rounded-xl hover:bg-stone-100 text-stone-800 font-bold text-sm">
+                <svg class="w-4 h-4 text-[#8D1B3D] shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                <span>عمالة منزلية بالشهر</span>
+            </a>
+            <a href="recruitment.html" class="flex items-center gap-2.5 px-4 py-3 rounded-xl hover:bg-stone-100 text-stone-800 font-bold text-sm">
+                <svg class="w-4 h-4 text-[#8D1B3D] shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2m1-18a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.85"/></svg>
+                <span>استقدام عمالة منزلية</span>
+            </a>
             <div class="pt-2 grid grid-cols-2 gap-2">
                 <a href="hourly.html" class="text-center bg-[#8D1B3D] text-white font-extrabold text-xs py-3 rounded-xl">حجز بالساعة</a>
                 <a href="monthly.html" class="text-center border border-[#8D1B3D] text-[#8D1B3D] font-extrabold text-xs py-3 rounded-xl">عقود شهرية</a>
@@ -125,7 +137,8 @@
                 <!-- Hero Text Column -->
                 <div class="lg:col-span-7 text-center lg:text-right">
                     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-sm text-xs sm:text-sm font-bold text-[#F6E299] mb-6">
-                        <span>✨ الخيار الأول للعمالة المنزلية الموثوقة في قطر</span>
+                        <svg class="w-4 h-4 text-[#D4AF37] shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 12 2 2 4-4"/></svg>
+                        <span>الخيار الأول للعمالة المنزلية الموثوقة في قطر</span>
                     </div>
 
                     <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-[52px] font-black leading-[1.22] mb-5">
@@ -144,6 +157,7 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m6-6-6 6 6 6"/></svg>
                         </a>
                         <a href="hourly.html" class="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/25 text-white font-bold text-base px-7 py-4 rounded-2xl backdrop-blur-sm transition-all">
+                            <svg class="w-5 h-5 text-[#F6E299]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
                             <span>حجز سريع بالساعة (من 40 ريال)</span>
                         </a>
                     </div>
@@ -180,7 +194,9 @@
                             <!-- Option 1: Hourly -->
                             <a href="hourly.html" class="group flex items-center justify-between p-4 rounded-2xl border-2 border-stone-100 hover:border-[#8D1B3D] bg-stone-50/70 hover:bg-[#8D1B3D]/[0.03] transition-all">
                                 <div class="flex items-center gap-3.5">
-                                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center text-2xl shrink-0">🕒</div>
+                                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center shrink-0">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
+                                    </div>
                                     <div>
                                         <h3 class="font-extrabold text-base text-stone-900 group-hover:text-[#8D1B3D] transition-colors">عمالة منزلية بالساعة</h3>
                                         <p class="text-xs text-stone-500 font-semibold mt-0.5">تنظيف، طبخ، ورعاية — زيارات مرنة</p>
@@ -196,7 +212,9 @@
                             <a href="monthly.html" class="group flex items-center justify-between p-4 rounded-2xl border-2 border-[#8D1B3D]/30 hover:border-[#8D1B3D] bg-[#8D1B3D]/[0.04] transition-all relative">
                                 <span class="absolute -top-2.5 left-4 bg-[#8D1B3D] text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">الأكثر طلباً</span>
                                 <div class="flex items-center gap-3.5">
-                                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D] text-white flex items-center justify-center text-2xl shrink-0">📅</div>
+                                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D] text-white flex items-center justify-center shrink-0">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                    </div>
                                     <div>
                                         <h3 class="font-extrabold text-base text-stone-900 group-hover:text-[#8D1B3D] transition-colors">عمالة منزلية بالشهر</h3>
                                         <p class="text-xs text-stone-500 font-semibold mt-0.5">عقود شهرية وسنوية بإشراف كامل</p>
@@ -211,7 +229,9 @@
                             <!-- Option 3: Recruitment -->
                             <a href="recruitment.html" class="group flex items-center justify-between p-4 rounded-2xl border-2 border-stone-100 hover:border-[#8D1B3D] bg-stone-50/70 hover:bg-[#8D1B3D]/[0.03] transition-all">
                                 <div class="flex items-center gap-3.5">
-                                    <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-700 flex items-center justify-center text-2xl shrink-0">🌍</div>
+                                    <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-700 flex items-center justify-center shrink-0">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2m1-18a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.85"/></svg>
+                                    </div>
                                     <div>
                                         <h3 class="font-extrabold text-base text-stone-900 group-hover:text-[#8D1B3D] transition-colors">استقدام عمالة منزلية</h3>
                                         <p class="text-xs text-stone-500 font-semibold mt-0.5">استقدام حسب المواصفات والجنسية</p>
@@ -224,8 +244,14 @@
                         </div>
 
                         <div class="mt-5 pt-4 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500 font-bold">
-                            <span>🔒 دفع إلكتروني آمن ومعتمد</span>
-                            <span>⚡ تأكيد فوري للطلب</span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-[#8D1B3D]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                                <span>دفع إلكتروني آمن ومعتمد</span>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-[#8D1B3D]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg>
+                                <span>تأكيد فوري للطلب</span>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -250,7 +276,9 @@
             <div class="service-card bg-white rounded-3xl p-6 sm:p-8 border border-stone-200/90 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-6">
-                        <div class="w-14 h-14 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center text-3xl">🕒</div>
+                        <div class="w-14 h-14 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
+                        </div>
                         <span class="text-xs font-extrabold text-stone-500 bg-stone-100 px-3 py-1 rounded-full">زيارات يومية مرنة</span>
                     </div>
 
@@ -269,15 +297,21 @@
 
                     <ul class="space-y-3 text-sm text-stone-700 font-semibold mb-8">
                         <li class="flex items-center gap-2.5">
-                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">✓</span>
+                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
+                            </span>
                             <span>اختيار عدد الساعات والعاملات بمرونة</span>
                         </li>
                         <li class="flex items-center gap-2.5">
-                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">✓</span>
+                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
+                            </span>
                             <span>توصيل مجاني إلى كافة مناطق قطر</span>
                         </li>
                         <li class="flex items-center gap-2.5">
-                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">✓</span>
+                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
+                            </span>
                             <span>فترات صباحية ومسائية طوال الأسبوع</span>
                         </li>
                     </ul>
@@ -285,19 +319,22 @@
 
                 <a href="hourly.html" class="w-full inline-flex items-center justify-center gap-2 py-4 px-6 rounded-2xl border-2 border-[#8D1B3D] text-[#8D1B3D] hover:bg-[#8D1B3D] hover:text-white font-black text-sm sm:text-base transition-all">
                     <span>احجز بالساعة الآن</span>
-                    <span>←</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m6-6-6 6 6 6"/></svg>
                 </a>
             </div>
 
             <!-- Card 2: Monthly (Featured) -->
             <div class="service-card bg-gradient-to-b from-[#5C0F26] to-[#8D1B3D] text-white rounded-3xl p-6 sm:p-8 border-2 border-[#8D1B3D] shadow-xl flex flex-col justify-between relative">
-                <div class="absolute -top-3.5 right-6 bg-[#D4AF37] text-stone-950 text-xs font-black px-4 py-1 rounded-full shadow">
-                    ⭐ الباقة الأكثر طلباً
+                <div class="absolute -top-3.5 right-6 bg-[#D4AF37] text-stone-950 text-xs font-black px-4 py-1 rounded-full shadow inline-flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="m12 2 2.9 6.26L22 9.27l-5 4.87 1.18 6.86L12 17.77 5.82 21 7 14.14 2 9.27l7.1-1.01L12 2Z"/></svg>
+                    <span>الباقة الأكثر طلباً</span>
                 </div>
 
                 <div>
                     <div class="flex items-center justify-between mb-6">
-                        <div class="w-14 h-14 rounded-2xl bg-white/15 text-white flex items-center justify-center text-3xl">📅</div>
+                        <div class="w-14 h-14 rounded-2xl bg-white/15 text-white flex items-center justify-center">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                        </div>
                         <span class="text-xs font-extrabold text-[#F6E299] bg-white/10 px-3 py-1 rounded-full">عقود مقيمة أو يومية</span>
                     </div>
 
@@ -316,15 +353,21 @@
 
                     <ul class="space-y-3 text-sm text-white/90 font-semibold mb-8">
                         <li class="flex items-center gap-2.5">
-                            <span class="w-5 h-5 rounded-full bg-[#D4AF37] text-stone-950 flex items-center justify-center text-xs font-black">✓</span>
+                            <span class="w-5 h-5 rounded-full bg-[#D4AF37] text-stone-950 flex items-center justify-center shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
+                            </span>
                             <span>ضمان استبدال فوري ومجاني طوال العقد</span>
                         </li>
                         <li class="flex items-center gap-2.5">
-                            <span class="w-5 h-5 rounded-full bg-[#D4AF37] text-stone-950 flex items-center justify-center text-xs font-black">✓</span>
+                            <span class="w-5 h-5 rounded-full bg-[#D4AF37] text-stone-950 flex items-center justify-center shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
+                            </span>
                             <span>متابعة دورية وإشراف مباشر من الشركة</span>
                         </li>
                         <li class="flex items-center gap-2.5">
-                            <span class="w-5 h-5 rounded-full bg-[#D4AF37] text-stone-950 flex items-center justify-center text-xs font-black">✓</span>
+                            <span class="w-5 h-5 rounded-full bg-[#D4AF37] text-stone-950 flex items-center justify-center shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
+                            </span>
                             <span>جنسيات متعددة بخبرات عالية في التدبير</span>
                         </li>
                     </ul>
@@ -332,7 +375,7 @@
 
                 <a href="monthly.html" class="w-full inline-flex items-center justify-center gap-2 py-4 px-6 rounded-2xl bg-white text-[#8D1B3D] hover:bg-[#FAF3E0] font-black text-sm sm:text-base shadow-lg transition-all">
                     <span>احجز عقد شهري الآن</span>
-                    <span>←</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m6-6-6 6 6 6"/></svg>
                 </a>
             </div>
 
@@ -340,7 +383,9 @@
             <div class="service-card bg-white rounded-3xl p-6 sm:p-8 border border-stone-200/90 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-6">
-                        <div class="w-14 h-14 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center text-3xl">👨‍👩‍👧‍👦</div>
+                        <div class="w-14 h-14 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2m1-18a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.85"/></svg>
+                        </div>
                         <span class="text-xs font-extrabold text-stone-500 bg-stone-100 px-3 py-1 rounded-full">كفالة خاصة</span>
                     </div>
 
@@ -356,15 +401,21 @@
 
                     <ul class="space-y-3 text-sm text-stone-700 font-semibold mb-8">
                         <li class="flex items-center gap-2.5">
-                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">✓</span>
+                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
+                            </span>
                             <span>اختيار السيرة الذاتية والجنسية والمهنة</span>
                         </li>
                         <li class="flex items-center gap-2.5">
-                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">✓</span>
+                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
+                            </span>
                             <span>إنهاء كافة إجراءات التأشيرة والفحص الطبي</span>
                         </li>
                         <li class="flex items-center gap-2.5">
-                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">✓</span>
+                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
+                            </span>
                             <span>توثيق العقود رسمياً مع فترة ضمان شاملة</span>
                         </li>
                     </ul>
@@ -372,7 +423,7 @@
 
                 <a href="recruitment.html" class="w-full inline-flex items-center justify-center gap-2 py-4 px-6 rounded-2xl border-2 border-[#8D1B3D] text-[#8D1B3D] hover:bg-[#8D1B3D] hover:text-white font-black text-sm sm:text-base transition-all">
                     <span>تقديم طلب استقدام</span>
-                    <span>←</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m6-6-6 6 6 6"/></svg>
                 </a>
             </div>
 
@@ -440,7 +491,9 @@
 
             <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                 <div class="bg-white p-6 rounded-3xl border border-stone-200/80 flex items-start gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center text-xl shrink-0">🛡️</div>
+                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 12 2 2 4-4"/></svg>
+                    </div>
                     <div>
                         <h3 class="font-extrabold text-base text-stone-900 mb-1">موثوقية وأمان تام</h3>
                         <p class="text-xs sm:text-sm text-stone-500 font-medium leading-relaxed">كوادر مفحوصة طبياً وأمنياً ومدربة على أعلى مستوى من الأمانة والمهنية.</p>
@@ -448,7 +501,9 @@
                 </div>
 
                 <div class="bg-white p-6 rounded-3xl border border-stone-200/80 flex items-start gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center text-xl shrink-0">⚡</div>
+                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
+                    </div>
                     <div>
                         <h3 class="font-extrabold text-base text-stone-900 mb-1">سرعة الاستجابة 24/7</h3>
                         <p class="text-xs sm:text-sm text-stone-500 font-medium leading-relaxed">فريق خدمة عملاء متخصص جاهز لخدمتكم ومتابعة طلباتكم على مدار الساعة.</p>
@@ -456,7 +511,9 @@
                 </div>
 
                 <div class="bg-white p-6 rounded-3xl border border-stone-200/80 flex items-start gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center text-xl shrink-0">⭐</div>
+                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m12 2 2.9 6.26L22 9.27l-5 4.87 1.18 6.86L12 17.77 5.82 21 7 14.14 2 9.27l7.1-1.01L12 2Z"/></svg>
+                    </div>
                     <div>
                         <h3 class="font-extrabold text-base text-stone-900 mb-1">ضمان الرضا والاستبدال</h3>
                         <p class="text-xs sm:text-sm text-stone-500 font-medium leading-relaxed">نضمن رضاك الكامل عن الخدمة مع إمكانية الاستبدال الفوري دون أي تعقيد.</p>
@@ -464,7 +521,9 @@
                 </div>
 
                 <div class="bg-white p-6 rounded-3xl border border-stone-200/80 flex items-start gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center text-xl shrink-0">💳</div>
+                    <div class="w-12 h-12 rounded-2xl bg-[#8D1B3D]/10 text-[#8D1B3D] flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M2 10h20M6 15h4"/></svg>
+                    </div>
                     <div>
                         <h3 class="font-extrabold text-base text-stone-900 mb-1">أسعار تنافسية وشفافة</h3>
                         <p class="text-xs sm:text-sm text-stone-500 font-medium leading-relaxed">باقات واضحة بدون رسوم مخفية وخيارات دفع إلكترونية آمنة ومعتمدة.</p>
@@ -480,12 +539,8 @@
         <div class="max-w-7xl mx-auto">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-10 pb-10 border-b border-white/10 text-right">
                 <div>
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 rounded-xl bg-white text-[#8D1B3D] flex items-center justify-center font-black text-lg">ج</div>
-                        <div>
-                            <h4 class="text-lg font-black leading-none">جسور</h4>
-                            <span class="text-[11px] text-white/65 font-semibold">الشركة القطرية لحلول القوى البشرية</span>
-                        </div>
+                    <div class="inline-block bg-white rounded-2xl px-4 py-2.5 mb-4">
+                        <img src="assets/logo-labor.png" alt="جسور" class="h-10 w-auto object-contain">
                     </div>
                     <p class="text-xs sm:text-sm text-white/75 leading-relaxed max-w-sm">
                         المنصة الرائدة في دولة قطر لتقديم خدمات العمالة المنزلية بالساعة وبالشهر والاستقدام وفق أعلى معايير الجودة.
@@ -495,18 +550,42 @@
                 <div>
                     <h4 class="text-sm font-black text-[#F6E299] mb-4">خدماتنا السريعة</h4>
                     <ul class="space-y-2.5 text-xs sm:text-sm text-white/80 font-semibold">
-                        <li><a href="hourly.html" class="hover:text-white transition-colors">← عمالة منزلية بالساعة</a></li>
-                        <li><a href="monthly.html" class="hover:text-white transition-colors">← عمالة منزلية بالشهر</a></li>
-                        <li><a href="recruitment.html" class="hover:text-white transition-colors">← استقدام عمالة منزلية</a></li>
+                        <li>
+                            <a href="hourly.html" class="inline-flex items-center gap-2 hover:text-white transition-colors">
+                                <svg class="w-3.5 h-3.5 text-[#D4AF37]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m6-6-6 6 6 6"/></svg>
+                                <span>عمالة منزلية بالساعة</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="monthly.html" class="inline-flex items-center gap-2 hover:text-white transition-colors">
+                                <svg class="w-3.5 h-3.5 text-[#D4AF37]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m6-6-6 6 6 6"/></svg>
+                                <span>عمالة منزلية بالشهر</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="recruitment.html" class="inline-flex items-center gap-2 hover:text-white transition-colors">
+                                <svg class="w-3.5 h-3.5 text-[#D4AF37]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m6-6-6 6 6 6"/></svg>
+                                <span>استقدام عمالة منزلية</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
                 <div>
                     <h4 class="text-sm font-black text-[#F6E299] mb-4">معلومات التواصل</h4>
-                    <ul class="space-y-2.5 text-xs sm:text-sm text-white/80 font-semibold">
-                        <li>📍 الدوحة، دولة قطر</li>
-                        <li>✉️ info@jusourqtr.com</li>
-                        <li>🕒 متاحون على مدار الساعة 24/7</li>
+                    <ul class="space-y-3 text-xs sm:text-sm text-white/80 font-semibold">
+                        <li class="flex items-center gap-2.5">
+                            <svg class="w-4 h-4 text-[#D4AF37] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10Z"/><circle cx="12" cy="11" r="2.2"/></svg>
+                            <span>الدوحة، دولة قطر</span>
+                        </li>
+                        <li class="flex items-center gap-2.5">
+                            <svg class="w-4 h-4 text-[#D4AF37] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="m3 7 9 6 9-6"/></svg>
+                            <span>info@jusourqtr.com</span>
+                        </li>
+                        <li class="flex items-center gap-2.5">
+                            <svg class="w-4 h-4 text-[#D4AF37] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
+                            <span>متاحون على مدار الساعة 24/7</span>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -521,9 +600,18 @@
     <!-- Sticky Bottom Bar on Mobile Phones Only -->
     <div class="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-stone-200 px-3 py-2.5 shadow-2xl">
         <div class="grid grid-cols-3 gap-2 text-center">
-            <a href="hourly.html" class="bg-[#8D1B3D] text-white font-extrabold text-xs py-2.5 rounded-xl shadow-sm">🕒 بالساعة</a>
-            <a href="monthly.html" class="bg-stone-900 text-white font-extrabold text-xs py-2.5 rounded-xl shadow-sm">📅 بالشهر</a>
-            <a href="recruitment.html" class="bg-stone-100 text-stone-800 border border-stone-200 font-extrabold text-xs py-2.5 rounded-xl">👥 استقدام</a>
+            <a href="hourly.html" class="inline-flex items-center justify-center gap-1.5 bg-[#8D1B3D] text-white font-extrabold text-xs py-2.5 rounded-xl shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
+                <span>بالساعة</span>
+            </a>
+            <a href="monthly.html" class="inline-flex items-center justify-center gap-1.5 bg-stone-900 text-white font-extrabold text-xs py-2.5 rounded-xl shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                <span>بالشهر</span>
+            </a>
+            <a href="recruitment.html" class="inline-flex items-center justify-center gap-1.5 bg-stone-100 text-stone-800 border border-stone-200 font-extrabold text-xs py-2.5 rounded-xl">
+                <svg class="w-3.5 h-3.5 text-[#8D1B3D]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+                <span>استقدام</span>
+            </a>
         </div>
     </div>
 
