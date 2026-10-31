@@ -287,6 +287,10 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; }
   overflow: hidden;
   background-color: var(--paper);
 }
+.app-body[data-auth="pending"] .topbar,
+.app-body[data-auth="pending"] .layout {
+  visibility: hidden;
+}
 
 .topbar {
   display: flex;

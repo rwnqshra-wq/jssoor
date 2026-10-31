@@ -27,6 +27,7 @@ let streamWatchdog = null;
 
 /** Entry point. */
 async function startDashboard() {
+  document.body.setAttribute('data-auth', 'pending');
   renderSoundToggle();
   renderConnection('connecting');
 
@@ -34,14 +35,17 @@ async function startDashboard() {
   try {
     boot = await api.bootstrap();
   } catch (error) {
-    if (error.status === 401) {
+    if (error.status === 401 || error.status === 403 || !apiGetToken()) {
       window.location.replace('login.html');
       return;
     }
+    document.body.setAttribute('data-auth', 'ok');
     renderConnection('offline');
     showToast('تعذّر تحميل البيانات. يُرجى إعادة تحميل الصفحة.', 'error');
     return;
   }
+
+  document.body.setAttribute('data-auth', 'ok');
 
   store.pages    = boot.pages || [];
   store.statuses = boot.statuses || [];
